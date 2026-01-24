@@ -1,5 +1,5 @@
 const path = require('path');
-const { SerializedItem, LifecycleEvent, Product } = require(path.join(__dirname, '../../../../database/models'));
+const { SerializedItem, LifecycleEvent, Product } = require(path.join(__dirname, '../../database/models'));
 const { generateSGTINWithSequence, generateQRCode, generateBarcode, validateSGTINFormat } = require('../utils/sgtinUtils');
 
 /**

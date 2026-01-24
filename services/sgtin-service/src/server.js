@@ -9,8 +9,8 @@ const path = require('path');
 dotenv.config();
 
 // Import security middleware
-const { authenticate } = require(path.join(__dirname, '../../../shared/middleware/auth'));
-const { sgtinGenerationLimiter, lenientLimiter, strictLimiter } = require(path.join(__dirname, '../../../shared/middleware/rateLimiter'));
+const { authenticate } = require(path.join(__dirname, '../shared/middleware/auth'));
+const { sgtinGenerationLimiter, lenientLimiter, strictLimiter } = require(path.join(__dirname, '../shared/middleware/rateLimiter'));
 
 const app = express();
 const PORT = process.env.PORT || 3001;
