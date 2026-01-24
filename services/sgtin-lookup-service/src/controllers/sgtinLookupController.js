@@ -1,5 +1,5 @@
 const path = require('path');
-const { query } = require(path.join(__dirname, '../../../../database/models/db'));
+const { query } = require(path.join(__dirname, '../../database/models/db'));
 
 class SGTINLookupController {
   // Get all GTINs with product names for dropdown
