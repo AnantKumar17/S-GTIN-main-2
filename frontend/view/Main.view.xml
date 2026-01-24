@@ -1,0 +1,168 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.Main"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	xmlns:viz="sap.viz"
+	xmlns:layout="sap.ui.layout">
+	<Page
+		id="main"
+		showNavButton="false">
+		<customHeader>
+			<Bar class="sapMPageHeader">
+				<contentLeft>
+					<core:HTML content='&lt;img src="images/SAP_NEW.png" alt="SAP" class="sapLogoHeaderMain" /&gt;' />
+				</contentLeft>
+			</Bar>
+		</customHeader>
+		<content>
+			<ScrollContainer height="100%" vertical="true">
+				<VBox class="sapUiMediumMargin">
+					<!-- Dashboard Header -->
+					<HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiMediumMarginBottom dashboardHeader">
+						<VBox>
+							<Title text="SGTIN Lifecycle Management Dashboard" level="H1" class="dashboardMainTitle"/>
+							<Text text="Real-time overview of your supply chain operations" class="sapUiTinyMarginTop dashboardSubtitle"/>
+						</VBox>
+						<HBox>
+							<Button icon="sap-icon://refresh" text="Refresh Data" type="Transparent" press="onRefreshDashboard"/>
+							<Text text="Last updated: {/lastUpdated}" class="sapUiSmallMarginBegin dashboardTimestamp"/>
+						</HBox>
+					</HBox>
+
+					<!-- KPI Cards Row -->
+					<HBox wrap="Wrap" class="sapUiMediumMarginBottom kpiContainer">
+						<!-- Purchase Orders KPI -->
+						<VBox class="kpiCard purchaseOrdersCard">
+							<HBox justifyContent="SpaceBetween" alignItems="Start" class="kpiHeader">
+								<VBox>
+									<Text text="PURCHASE ORDERS" class="kpiLabel"/>
+									<Title text="{/kpis/totalPurchaseOrders}" level="H1" class="kpiValue"/>
+									<HBox alignItems="Center" class="sapUiTinyMarginTop">
+										<Text text="{/kpis/openPurchaseOrders} Open" class="kpiSubValue"/>
+										<Text text="•" class="sapUiTinyMarginBegin sapUiTinyMarginEnd kpiSeparator"/>
+										<Text text="{/kpis/partiallyReceivedPOs} Partial" class="kpiSubValue"/>
+										<Text text="•" class="sapUiTinyMarginBegin sapUiTinyMarginEnd kpiSeparator"/>
+										<Text text="{/kpis/fullyReceivedPOs} Complete" class="kpiSubValue"/>
+									</HBox>
+								</VBox>
+								<core:Icon src="sap-icon://cart" class="kpiIcon purchaseOrdersIcon"/>
+							</HBox>
+							<VBox class="sapUiSmallMarginTop">
+								<Button text="Manage Orders" type="Transparent" press="onNavigateToPurchaseOrders" class="kpiAction"/>
+							</VBox>
+						</VBox>
+
+					<!-- Inventory KPI -->
+					<VBox class="kpiCard inventoryCard">
+						<HBox justifyContent="SpaceBetween" alignItems="Start" class="kpiHeader">
+							<VBox>
+								<Text text="INVENTORY ITEMS" class="kpiLabel"/>
+								<Title text="{/kpis/totalInventoryItems}" level="H1" class="kpiValue"/>
+								<HBox alignItems="Center" class="sapUiTinyMarginTop">
+									<Text text="{/kpis/inStockItems} In Stock" class="kpiSubValue"/>
+									<Text text="•" class="sapUiTinyMarginBegin sapUiTinyMarginEnd kpiSeparator"/>
+									<Text text="{/kpis/soldItems} Sold" class="kpiSubValue"/>
+									<Text text="•" class="sapUiTinyMarginBegin sapUiTinyMarginEnd kpiSeparator"/>
+									<Text text="{/kpis/createdItems} Created" class="kpiSubValue"/>
+								</HBox>
+							</VBox>
+							<core:Icon src="sap-icon://inventory" class="kpiIcon inventoryIcon"/>
+						</HBox>
+						<VBox class="sapUiSmallMarginTop">
+							<Text text="Stock Value: €{/kpis/totalStockValue}" class="kpiDetail"/>
+							<Button text="View Inventory" type="Transparent" press="onNavigateToInventory" class="kpiAction"/>
+						</VBox>
+					</VBox>
+
+						<!-- Sales KPI -->
+						<VBox class="kpiCard salesCard">
+							<HBox justifyContent="SpaceBetween" alignItems="Start" class="kpiHeader">
+								<VBox>
+									<Text text="TOTAL SALES" class="kpiLabel"/>
+									<Title text="€{/kpis/totalSalesAmount}" level="H1" class="kpiValue"/>
+									<HBox alignItems="Center" class="sapUiTinyMarginTop">
+										<Text text="{/kpis/totalSalesCount} Transactions" class="kpiSubValue"/>
+										<Text text="•" class="sapUiTinyMarginBegin sapUiTinyMarginEnd kpiSeparator"/>
+										<Text text="€{/kpis/averageSaleValue} Avg" class="kpiSubValue"/>
+									</HBox>
+								</VBox>
+								<core:Icon src="sap-icon://sales-document" class="kpiIcon salesIcon"/>
+							</HBox>
+							<VBox class="sapUiSmallMarginTop">
+								<Text text="Today's Sales: €{/kpis/todaysSales}" class="kpiDetail"/>
+								<Button text="Open POS" type="Transparent" press="onNavigateToPOS" class="kpiAction"/>
+							</VBox>
+						</VBox>
+
+						<!-- Goods Receipt KPI -->
+						<VBox class="kpiCard goodsReceiptCard">
+							<HBox justifyContent="SpaceBetween" alignItems="Start" class="kpiHeader">
+								<VBox>
+									<Text text="GOODS RECEIPT" class="kpiLabel"/>
+									<Title text="{/kpis/totalGoodsReceived}" level="H1" class="kpiValue goodsReceiptValue"/>
+									<HBox alignItems="Center" class="sapUiTinyMarginTop">
+										<Text text="{/kpis/pendingReceipts} Pending" class="kpiSubValue"/>
+									</HBox>
+								</VBox>
+								<core:Icon src="sap-icon://incoming-call" class="kpiIcon goodsReceiptIcon"/>
+							</HBox>
+							<VBox class="sapUiSmallMarginTop">
+								<Text text="Items Received Today: {/kpis/itemsReceivedToday}" class="kpiDetail"/>
+								<Button text="Receive Goods" type="Transparent" press="onNavigateToGoodsReceipt" class="kpiAction"/>
+							</VBox>
+						</VBox>
+					</HBox>
+
+
+					<!-- Navigation Cards (Enhanced versions of original tiles) -->
+					<Panel headerText="Module Access" class="sapUiMediumMarginTop moduleAccessPanel">
+						<HBox wrap="Wrap" class="moduleContainer">
+							<VBox class="moduleCard purchaseOrderModule">
+								<core:Icon src="sap-icon://cart" class="moduleIcon"/>
+								<Title text="Purchase Orders" level="H4" class="moduleTitle"/>
+								<Text text="Manage purchase orders with automatic SGTIN generation" class="moduleDescription"/>
+								<Button text="Access Module" type="Emphasized" press="onNavigateToPurchaseOrders" class="moduleButton"/>
+							</VBox>
+
+							<VBox class="moduleCard goodsReceiptModule">
+								<core:Icon src="sap-icon://incoming-call" class="moduleIcon"/>
+								<Title text="Goods Receipt" level="H4" class="moduleTitle"/>
+								<Text text="Scan barcodes/QR codes to receive items into inventory" class="moduleDescription"/>
+								<Button text="Access Module" type="Emphasized" press="onNavigateToGoodsReceipt" class="moduleButton"/>
+							</VBox>
+
+							<VBox class="moduleCard inventoryModule" alignItems="Center">
+								<core:Icon src="sap-icon://inventory" class="moduleIcon"/>
+								<Title text="Inventory Management" level="H4" class="moduleTitle"/>
+								<Text text="View all serialized items with full lifecycle tracking" class="moduleDescription"/>
+								<Button text="Access Module" type="Emphasized" press="onNavigateToInventory" class="moduleButton"/>
+							</VBox>
+
+							<VBox class="moduleCard posModule">
+								<core:Icon src="sap-icon://sales-order" class="moduleIcon"/>
+								<Title text="Point of Sale" level="H4" class="moduleTitle"/>
+								<Text text="Process sales transactions with counterfeit detection" class="moduleDescription"/>
+								<Button text="Access Module" type="Emphasized" press="onNavigateToPOS" class="moduleButton"/>
+							</VBox>
+
+							<VBox class="moduleCard chatbotModule">
+								<core:Icon src="sap-icon://discussion-2" class="moduleIcon"/>
+								<Title text="AI Assistant" level="H4" class="moduleTitle"/>
+								<Text text="Ask questions about purchase orders, inventory, and sales" class="moduleDescription"/>
+								<Button text="Access Module" type="Emphasized" press="onNavigateToChatbot" class="moduleButton"/>
+							</VBox>
+
+							<VBox class="moduleCard sgtinLookupModule">
+								<core:Icon src="sap-icon://search" class="moduleIcon"/>
+								<Title text="Product Passport" level="H4" class="moduleTitle"/>
+								<Text text="View complete product lifecycle by selecting GTIN, Purchase Order, and SGTIN" class="moduleDescription"/>
+								<Button text="Access Module" type="Emphasized" press="onNavigateToSgtinLookup" class="moduleButton"/>
+							</VBox>
+						</HBox>
+					</Panel>
+				</VBox>
+			</ScrollContainer>
+		</content>
+	</Page>
+</mvc:View>

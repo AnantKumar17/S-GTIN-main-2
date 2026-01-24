@@ -1,0 +1,181 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.Chatbot"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:core="sap.ui.core">
+	<Page
+		id="chatbot"
+		title="{i18n>intelligentAssistant}"
+		showNavButton="true"
+		navButtonPress="onNavBack">
+		<content>
+			<VBox class="sapUiMediumMargin chatbotContainer">
+				<!-- Quick Actions -->
+				<Panel headerText="{i18n>quickActions}" class="sapUiResponsiveMargin">
+					<content>
+						<HBox class="sapUiSmallMargin" wrap="Wrap">
+							<Button text="{i18n>statusOfPO}" 
+								type="Default"
+								press="onQuickAction"
+								class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+								<customData>
+									<core:CustomData key="action" value="po_status"/>
+								</customData>
+							</Button>
+							<Button text="{i18n>itemsWithoutSGTIN}" 
+								type="Default"
+								press="onQuickAction"
+								class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+								<customData>
+									<core:CustomData key="action" value="missing_sgtins"/>
+								</customData>
+							</Button>
+							<Button text="{i18n>stockByLocation}" 
+								type="Default"
+								press="onQuickAction"
+								class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+								<customData>
+									<core:CustomData key="action" value="stock_location"/>
+								</customData>
+							</Button>
+							<Button text="{i18n>itemsInBatch}" 
+								type="Default"
+								press="onQuickAction"
+								class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+								<customData>
+									<core:CustomData key="action" value="batch_items"/>
+								</customData>
+							</Button>
+							<Button text="{i18n>recentSales}" 
+								type="Default"
+								press="onQuickAction"
+								class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+								<customData>
+									<core:CustomData key="action" value="recent_sales"/>
+								</customData>
+							</Button>
+							<Button text="{i18n>inventorySummary}" 
+								type="Default"
+								press="onQuickAction"
+								class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+								<customData>
+									<core:CustomData key="action" value="inventory_summary"/>
+								</customData>
+							</Button>
+						</HBox>
+					</content>
+				</Panel>
+
+				<!-- Chat Messages Area -->
+				<Panel headerText="{i18n>chatConversation}" class="sapUiResponsiveMargin chatPanel">
+					<content>
+						<ScrollContainer id="chatMessagesContainer" 
+							height="400px"
+							horizontal="false"
+							vertical="true"
+							class="chatScrollContainer">
+							<VBox id="chatMessages" 
+								items="{/messages}"
+								class="chatMessages">
+								<items>
+									<VBox class="{path: 'sender', formatter: '.getChatMessageClass'}"
+										visible="{= ${sender} !== undefined}">
+										<HBox class="chatMessageHeader">
+											<Text text="{path: 'sender', formatter: '.getSenderName'}" 
+												class="chatMessageSender"/>
+											<ToolbarSpacer/>
+											<Text text="{path: 'timestamp', formatter: '.formatChatTime'}" 
+												class="chatMessageTime"/>
+										</HBox>
+										<VBox class="chatMessageContent">
+											<FormattedText htmlText="{message}" class="chatMessageText"/>
+											
+											<!-- Data Table for structured responses - only show if we have valid tabular data -->
+											<Table items="{data}" 
+												visible="{= ${data} !== undefined &amp;&amp; ${data/length} > 0 &amp;&amp; (${data/0/po_id} !== undefined || ${data/0/sgtin} !== undefined || ${data/0/product_name} !== undefined || ${data/0/sale_id} !== undefined)}"
+												class="chatDataTable sapUiSmallMarginTop">
+												<columns>
+													<Column visible="{= ${data/0/po_id} !== undefined}">
+														<Text text="{i18n>poId}"/>
+													</Column>
+													<Column visible="{= ${data/0/sgtin} !== undefined}">
+														<Text text="{i18n>sgtin}"/>
+													</Column>
+													<Column visible="{= ${data/0/product_name} !== undefined}">
+														<Text text="{i18n>productName}"/>
+													</Column>
+													<Column visible="{= ${data/0/status} !== undefined}">
+														<Text text="{i18n>status}"/>
+													</Column>
+													<Column visible="{= ${data/0/quantity} !== undefined}">
+														<Text text="{i18n>quantity}"/>
+													</Column>
+													<Column visible="{= ${data/0/location} !== undefined}">
+														<Text text="{i18n>location}"/>
+													</Column>
+													<Column visible="{= ${data/0/sale_id} !== undefined}">
+														<Text text="{i18n>saleId}"/>
+													</Column>
+													<Column visible="{= ${data/0/total_amount} !== undefined}">
+														<Text text="{i18n>amount}"/>
+													</Column>
+												</columns>
+												<items>
+													<ColumnListItem>
+														<cells>
+															<Text text="{po_id}" visible="{= ${po_id} !== undefined}"/>
+															<Text text="{sgtin}" visible="{= ${sgtin} !== undefined}"/>
+															<Text text="{product_name}" visible="{= ${product_name} !== undefined}"/>
+															<ObjectStatus text="{status}" 
+																state="{path: 'status', formatter: '.formatDataStatus'}"
+																visible="{= ${status} !== undefined}"/>
+															<Text text="{quantity}" visible="{= ${quantity} !== undefined}"/>
+															<Text text="{location}" visible="{= ${location} !== undefined}"/>
+															<Text text="{sale_id}" visible="{= ${sale_id} !== undefined}"/>
+															<Text text="€{total_amount}" visible="{= ${total_amount} !== undefined}"/>
+														</cells>
+													</ColumnListItem>
+												</items>
+											</Table>
+										</VBox>
+									</VBox>
+								</items>
+							</VBox>
+						</ScrollContainer>
+					</content>
+				</Panel>
+
+				<!-- Chat Input -->
+				<Panel class="sapUiResponsiveMargin chatInputPanel">
+					<content>
+						<HBox class="sapUiSmallMargin" alignItems="End">
+							<VBox class="sapUiSmallMarginEnd chatInputContainer">
+								<Label text="{i18n>askQuestion}" class="sapUiSmallMarginBottom"/>
+								<TextArea id="chatInput" 
+									value="{/currentMessage}"
+									placeholder="{i18n>chatPlaceholder}"
+									rows="2"
+									width="100%"
+									maxLength="500"/>
+							</VBox>
+							<VBox>
+								<Button text="{i18n>send}" 
+									type="Emphasized"
+									press="onSendMessage"
+									enabled="{= ${/currentMessage}.length > 0}"
+									icon="sap-icon://paper-plane"/>
+								<Button text="{i18n>clear}" 
+									type="Default"
+									press="onClearChat"
+									class="sapUiSmallMarginTop"
+									icon="sap-icon://clear-all"/>
+							</VBox>
+						</HBox>
+					</content>
+				</Panel>
+
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>

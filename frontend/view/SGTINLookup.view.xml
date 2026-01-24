@@ -1,0 +1,351 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.SGTINLookup"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:layout="sap.ui.layout"
+	xmlns:core="sap.ui.core">
+	<Page
+		id="sgtinPassportPage"
+		showNavButton="true"
+		navButtonPress="onNavBack"
+		title="Product Passport (SGTIN)"
+		class="sapUiResponsiveContentPadding">
+		<content>
+			<VBox class="sapUiSmallMarginTopBottom">
+				
+				<!-- Cascading Filter Panel -->
+				<Panel
+					headerText="Select Product"
+					expandable="false"
+					expanded="true"
+					class="sapUiResponsiveMargin">
+					<content>
+						<VBox class="sapUiSmallMargin">
+							
+							<!-- Step 1: GTIN Selection -->
+							<VBox class="sapUiSmallMarginBottom">
+								<Label text="Step 1: Select Product (GTIN)" class="sapUiTinyMarginBottom" design="Bold"/>
+								<Select
+									id="gtinSelect"
+									width="100%"
+									items="{/gtins}"
+									selectedKey="{/selectedGtin}"
+									change="onGtinChange"
+									forceSelection="false">
+									<core:Item key="{gtin}" text="{name} ({brand}) - {gtin}" />
+								</Select>
+								<Text text="{= ${/selectedGtin} ? ${/gtins}.length + ' products available' : 'Please select a product'}" class="sapUiTinyMarginTop"/>
+							</VBox>
+
+							<!-- Step 2: Purchase Order Selection -->
+							<VBox class="sapUiSmallMarginBottom" visible="{= !!${/selectedGtin}}">
+								<Label text="Step 2: Select Purchase Order" class="sapUiTinyMarginBottom" design="Bold"/>
+								<Select
+									id="poSelect"
+									width="100%"
+									items="{/purchaseOrders}"
+									selectedKey="{/selectedPoId}"
+									change="onPoChange"
+									enabled="{= !!${/selectedGtin}}"
+									forceSelection="false">
+									<core:Item 
+										key="{po_id}" 
+										text="{po_id} ({sgtin_count} items) - {status}" />
+								</Select>
+								<Text text="{= ${/selectedPoId} ? ${/purchaseOrders}.length + ' purchase orders available' : 'Select purchase order'}" class="sapUiTinyMarginTop"/>
+							</VBox>
+
+							<!-- Step 3: SGTIN Selection -->
+							<VBox class="sapUiSmallMarginBottom" visible="{= !!${/selectedPoId}}">
+								<Label text="Step 3: Select Serial Number (SGTIN)" class="sapUiTinyMarginBottom" design="Bold"/>
+								<Select
+									id="sgtinSelect"
+									width="100%"
+									items="{/sgtins}"
+									selectedKey="{/selectedSgtin}"
+									change="onSgtinChange"
+									enabled="{= !!${/selectedPoId}}"
+									forceSelection="false">
+									<core:Item 
+										key="{sgtin}" 
+										text="{sgtin} - {status} - {location}" />
+								</Select>
+								<Text text="{= ${/selectedSgtin} ? ${/sgtins}.length + ' items available' : 'Select SGTIN'}" class="sapUiTinyMarginTop"/>
+							</VBox>
+
+							<!-- Lookup Button -->
+							<HBox class="sapUiSmallMarginTop" justifyContent="SpaceBetween">
+								<Button
+									text="View Passport"
+									type="Emphasized"
+									press="onViewPassport"
+									enabled="{= !!${/selectedSgtin}}"
+									icon="sap-icon://inspection"/>
+								<HBox>
+									<Button
+										text="Export Passport"
+										type="Accept"
+										press="onExportPassport"
+										enabled="{= !!${/passport}}"
+										visible="{/showPassport}"
+										icon="sap-icon://download"
+										class="sapUiTinyMarginEnd"/>
+									<Button
+										text="Clear Selection"
+										type="Default"
+										press="onClearSelection"
+										icon="sap-icon://clear-filter"/>
+								</HBox>
+							</HBox>
+						</VBox>
+					</content>
+				</Panel>
+
+				<!-- Loading Indicator -->
+				<BusyIndicator id="busyIndicator" visible="{/isLoading}" class="sapUiMediumMarginTopBottom"/>
+
+				<!-- Passport Display Panel -->
+				<Panel
+					headerText="Product Passport"
+					visible="{/showPassport}"
+					expandable="false"
+					expanded="true"
+					class="sapUiResponsiveMargin">
+					<content>
+						<VBox class="sapUiSmallMargin">
+
+							<!-- Error Message -->
+							<MessageStrip
+								text="{/errorMessage}"
+								type="Error"
+								visible="{/showError}"
+								class="sapUiMediumMarginBottom"/>
+
+							<!-- Passport Content -->
+							<VBox visible="{= !${/showError} &amp;&amp; !!${/passport}}">
+
+								<!-- Product Information -->
+								<VBox class="sapUiMediumMarginBottom">
+									<Title text="Product Information" level="H4" class="sapUiSmallMarginBottom"/>
+									<layout:Grid defaultSpan="L6 M6 S12" class="sapUiSmallMarginTop">
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Product Name:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/product_name}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Brand:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/brand}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Category:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/category}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Subcategory:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/subcategory}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="GTIN:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/gtin}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Product Price:" class="sapUiTinyMarginBottom"/>
+											<Text text="€{/passport/product_price}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+									</layout:Grid>
+									<VBox class="sapUiSmallMarginTop">
+										<Label text="Description:" class="sapUiTinyMarginBottom"/>
+										<Text text="{/passport/description}"/>
+									</VBox>
+								</VBox>
+
+								<!-- Serialization Details -->
+								<VBox class="sapUiMediumMarginBottom">
+									<Title text="Serialization Details" level="H4" class="sapUiSmallMarginBottom"/>
+									<layout:Grid defaultSpan="L6 M6 S12" class="sapUiSmallMarginTop">
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="SGTIN:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/sgtin}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Status:" class="sapUiTinyMarginBottom"/>
+											<ObjectStatus
+												text="{/passport/status}"
+												state="{path: '/passport/status', formatter: '.formatStatusState'}"
+												class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Current Location:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/location}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show batch if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/batch}}">
+											<Label text="Batch Number:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/batch}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show manufacture date if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/manufacture_date}}">
+											<Label text="Manufacture Date:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/manufacture_date', formatter: '.formatDateOnly'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Created At:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/sgtin_created_at', formatter: '.formatDateTime'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+									</layout:Grid>
+								</VBox>
+
+								<!-- Purchase Order Information -->
+								<VBox class="sapUiMediumMarginBottom" visible="{= !!${/passport/po_id}}">
+									<Title text="Purchase Order Information" level="H4" class="sapUiSmallMarginBottom"/>
+									<layout:Grid defaultSpan="L6 M6 S12" class="sapUiSmallMarginTop">
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="PO Number:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/po_id}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show supplier if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/supplier}}">
+											<Label text="Supplier:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/supplier}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show warehouse if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/warehouse}}">
+											<Label text="Warehouse:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/warehouse}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show PO status if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/po_status}}">
+											<Label text="PO Status:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/po_status}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show expected delivery if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/expected_delivery_date}}">
+											<Label text="Expected Delivery:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/expected_delivery_date', formatter: '.formatDateOnly'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="PO Created:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/po_created_at', formatter: '.formatDateTime'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+									</layout:Grid>
+								</VBox>
+
+								<!-- Goods Receipt Information -->
+								<VBox class="sapUiMediumMarginBottom" visible="{= !!${/passport/gr_id}}">
+									<Title text="Goods Receipt Information" level="H4" class="sapUiSmallMarginBottom"/>
+									<layout:Grid defaultSpan="L6 M6 S12" class="sapUiSmallMarginTop">
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="GR Number:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/gr_id}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Received At:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/gr_received_at', formatter: '.formatDateTime'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show received by if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/received_by}}">
+											<Label text="Received By:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/received_by}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show GR warehouse if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/gr_warehouse}}">
+											<Label text="GR Warehouse:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/gr_warehouse}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+									</layout:Grid>
+								</VBox>
+
+								<!-- Sales Information -->
+								<VBox class="sapUiMediumMarginBottom" visible="{= !!${/passport/sale_id}}">
+									<Title text="Sales Information" level="H4" class="sapUiSmallMarginBottom"/>
+									<layout:Grid defaultSpan="L6 M6 S12" class="sapUiSmallMarginTop">
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Sale ID:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/sale_id}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Store:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/store_id}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom">
+											<Label text="Sold At:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/sold_at', formatter: '.formatDateTime'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show cashier if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/cashier_id}}">
+											<Label text="Cashier:" class="sapUiTinyMarginBottom"/>
+											<Text text="{/passport/cashier_id}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show selling price if it exists -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/actual_selling_price}}">
+											<Label text="Selling Price:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/actual_selling_price', formatter: '.formatPrice'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<!-- Only show profit information if profit exists and is not zero -->
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/profit} &amp;&amp; ${/passport/profit} !== 0}">
+											<Label text="Profit:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/profit', formatter: '.formatProfit'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+										<VBox class="sapUiTinyMarginBottom" visible="{= !!${/passport/profit_margin} &amp;&amp; ${/passport/profit_margin} !== 0}">
+											<Label text="Profit Margin:" class="sapUiTinyMarginBottom"/>
+											<Text text="{path: '/passport/profit_margin', formatter: '.formatProfitMargin'}" class="sapUiSmallMarginBottom"/>
+										</VBox>
+									</layout:Grid>
+								</VBox>
+
+								<!-- Lifecycle Events Timeline -->
+								<VBox class="sapUiMediumMarginBottom">
+									<Title text="Lifecycle Timeline" level="H4" class="sapUiSmallMarginBottom"/>
+									<VBox visible="{= ${/passport/lifecycle_events}.length > 0}">
+										<List
+											items="{/passport/lifecycle_events}"
+											noDataText="No lifecycle events recorded">
+											<CustomListItem>
+												<VBox class="sapUiSmallMarginTopBottom">
+													<HBox>
+														<core:Icon src="sap-icon://timeline-bar-chart" class="sapUiTinyMarginEnd" color="#0854A0"/>
+														<VBox>
+															<Text text="{event_type}" class="sapUiTinyMarginBottom" renderWhitespace="true"/>
+															<Text text="{path: 'created_at', formatter: '.formatDateTime'}" class="sapUiTinyMarginBottom"/>
+															<Text text="Location: {path: 'location', formatter: '.formatNA'}"/>
+														</VBox>
+													</HBox>
+												</VBox>
+											</CustomListItem>
+										</List>
+									</VBox>
+									<MessageStrip
+										text="No lifecycle events recorded in the system"
+										type="Information"
+										visible="{= ${/passport/lifecycle_events}.length === 0}"
+										class="sapUiSmallMarginTop"/>
+								</VBox>
+
+								<!-- Anti-Counterfeiting Information -->
+								<VBox class="sapUiMediumMarginBottom" visible="{= !!${/passport/barcode} || !!${/passport/qr_code}}">
+									<Title text="Anti-Counterfeiting" level="H4" class="sapUiSmallMarginBottom"/>
+									<Text text="Barcode and QR codes available for verification" class="sapUiTinyMarginBottom"/>
+									<HBox class="sapUiSmallMarginTop">
+										<Button 
+											text="View Barcode" 
+											icon="sap-icon://bar-code"
+											visible="{= !!${/passport/barcode}}"
+											press="onViewBarcode"
+											class="sapUiTinyMarginEnd"/>
+										<Button 
+											text="View QR Code" 
+											icon="sap-icon://qr-code"
+											visible="{= !!${/passport/qr_code}}"
+											press="onViewQRCode"/>
+									</HBox>
+								</VBox>
+
+							</VBox>
+						</VBox>
+					</content>
+				</Panel>
+
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>

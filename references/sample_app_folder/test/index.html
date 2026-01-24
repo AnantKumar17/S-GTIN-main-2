@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>UI Adaptation at Runtime for SAP Fiori Elements</title>
+
+		<!-- Contains the FLP configuration -->
+		<script src="./sap-ui-config.js"></script>
+		<!-- Ushell is bootstrapped with sandbox2 -->
+		<script src="../../../../../../../../../resources/sap/ushell/bootstrap/sandbox2.js" id="sap-ushell-bootstrap"></script>
+		
+		<script id="sap-ui-bootstrap"
+			src="../../../../../../../../../resources/sap-ui-core.js"
+			data-sap-ui-libs="sap.m, sap.ui.layout, sap.ui.comp, sap.ui.rta"
+			data-sap-ui-theme="sap_fiori_3"
+			data-sap-ui-compatVersion="edge"
+			data-sap-ui-language="en"
+			data-sap-ui-xx-lesssupport="false"
+			data-sap-ui-async="true"
+			data-sap-ui-flexibilityservices='[{"connector": "LocalStorageConnector"}]'
+			data-sap-ui-frameOptions="allow"
+			data-sap-ui-resourceroots='{
+				"sap.suite.ui.generic.template": "../../../../../../../../../resources/sap/suite/ui/generic/template",
+				"sap/ushell/demo": "../../../../../../../../../test-resources/sap/ushell/demoapps"
+			}'>
+		</script>
+		<!-- Renders the FLP -->
+		<script src="./index.js"></script>
+
+	</head>
+
+	<!-- UI Content -->
+	<body class="sapUiBody" id="content">
+	</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "sgtin-lifecycle-frontend",
+  "version": "1.0.0",
+  "description": "SGTIN Lifecycle Management Frontend - SAP UI5 Application",
+  "main": "index.html",
+  "scripts": {
+    "start": "ui5 serve --open",
+    "build": "ui5 build",
+    "serve": "http-server dist -p 8080 -o",
+    "dev": "ui5 serve --port 8080 --open index.html"
+  },
+  "dependencies": {
+    "@sap/ui5-runtime": "^1.120.0"
+  },
+  "devDependencies": {
+    "@ui5/cli": "^3.0.0",
+    "http-server": "^14.1.0"
+  },
+  "ui5": {
+    "dependencies": [
+      "@sap/ui5-runtime"
+    ]
+  },
+  "keywords": [
+    "sap",
+    "ui5",
+    "sgtin",
+    "lifecycle",
+    "serialization"
+  ],
+  "author": "SAP SGTIN Team",
+  "license": "MIT"
+}

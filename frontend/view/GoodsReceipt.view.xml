@@ -1,0 +1,175 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.GoodsReceipt"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:core="sap.ui.core">
+	<Page
+		id="goodsReceipt"
+		title="{i18n>goodsReceipt}"
+		showNavButton="true"
+		navButtonPress="onNavBack">
+		<content>
+			<VBox class="sapUiMediumMargin">
+				<!-- Scanner Section -->
+				<Panel headerText="{i18n>scanSGTINs}" class="sapUiResponsiveMargin">
+					<content>
+						<VBox class="sapUiSmallMargin">
+							<Label text="{i18n>selectPO}" class="sapUiSmallMarginBottom"/>
+							<ComboBox id="poSelect" 
+								items="{/purchaseOrders}"
+								selectedKey="{/selectedPOId}"
+								class="sapUiSmallMarginBottom">
+								<core:Item key="{po_id}" text="{po_id} - {product_name} ({quantity} units)"/>
+							</ComboBox>
+
+							<Label text="{i18n>warehouse}" class="sapUiSmallMarginBottom"/>
+							<Input id="warehouseInput" 
+								value="{/warehouse}"
+								placeholder="Enter warehouse location"
+								class="sapUiSmallMarginBottom"/>
+
+						<HBox class="sapUiSmallMarginTop">
+						<Button text="Upload QR Code (Image/PDF)" 
+							icon="sap-icon://upload"
+							type="Emphasized"
+							press="onUploadBarcodeImage"
+							class="sapUiSmallMarginEnd"/>
+							<Button text="{i18n>manualEntry}" 
+								type="Default"
+								press="onManualEntry"/>
+						</HBox>
+						
+						<!-- Hidden File Uploader for QR Code Image -->
+						<core:HTML id="barcodeFileUploader" content="
+							&lt;input type='file' id='barcodeImageInput' accept='image/*,.pdf,application/pdf' style='display:none;' /&gt;
+						"/>							<!-- Manual SGTIN Input -->
+							<VBox id="manualEntryBox" visible="false" class="sapUiSmallMarginTop">
+								<Label text="{i18n>enterSGTIN}" class="sapUiSmallMarginBottom"/>
+								<HBox>
+									<Input id="sgtinInput" 
+										value="{/currentSGTIN}"
+										placeholder="01{GTIN}21{Serial}"
+										class="sapUiSmallMarginEnd"
+										width="300px"/>
+									<Button text="{i18n>addSGTIN}" 
+										type="Emphasized"
+										press="onAddSGTIN"/>
+								</HBox>
+							</VBox>
+
+							<!-- Camera Preview (placeholder) -->
+							<VBox id="cameraBox" visible="false" class="sapUiSmallMarginTop">
+								<Label text="{i18n>cameraPreview}" class="sapUiSmallMarginBottom"/>
+								<Panel class="scannerPanel" height="300px">
+									<content>
+										<VBox alignItems="Center" justifyContent="Center" height="100%">
+											<Title text="📷" level="H1" class="sapUiMediumMarginBottom"/>
+											<Text text="{i18n>cameraPlaceholder}" class="sapUiMediumMarginBottom"/>
+											<Button text="{i18n>stopScanning}" 
+												type="Default"
+												press="onStopScanning"/>
+										</VBox>
+									</content>
+								</Panel>
+							</VBox>
+						</VBox>
+					</content>
+				</Panel>
+
+				<!-- Scanned Items -->
+				<Panel headerText="{i18n>scannedItems}" class="sapUiResponsiveMargin">
+					<content>
+						<Table id="scannedItemsTable" 
+							items="{/scannedItems}"
+							mode="Delete"
+							delete="onRemoveScannedItem">
+							<headerToolbar>
+								<Toolbar>
+									<Title text="{i18n>itemsToReceive}" level="H2"/>
+									<ToolbarSpacer/>
+									<Text text="Count: {/scannedItems/length}"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>sgtin}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>gtin}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>serialNumber}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>status}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{sgtin}"/>
+										<Text text="{gtin}"/>
+										<Text text="{serial}"/>
+										<ObjectStatus text="{status}" 
+											state="{path: 'status', formatter: '.formatItemStatus'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+
+						<HBox class="sapUiMediumMarginTop" justifyContent="End">
+							<Button text="{i18n>clearAll}" 
+								type="Default"
+								press="onClearAll"
+								class="sapUiSmallMarginEnd"/>
+							<Button text="{i18n>processReceipt}" 
+								type="Emphasized"
+								press="onProcessReceipt"
+								enabled="{= ${/scannedItems/length} > 0}"/>
+						</HBox>
+					</content>
+				</Panel>
+
+				<!-- Recent Goods Receipts -->
+				<Panel headerText="{i18n>recentReceipts}" class="sapUiResponsiveMargin">
+					<content>
+						<Table id="receiptsTable" 
+							items="{/goodsReceipts}"
+							growing="true"
+							growingThreshold="10">
+							<columns>
+								<Column>
+									<Text text="{i18n>grId}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>poId}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>warehouse}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>itemsCount}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>receivedAt}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{gr_id}"/>
+										<Text text="{po_id}"/>
+										<Text text="{warehouse}"/>
+										<Text text="{items_count}"/>
+										<Text text="{path: 'received_at', formatter: '.formatDate'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</content>
+				</Panel>
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>

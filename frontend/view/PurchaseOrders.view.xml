@@ -1,0 +1,147 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.PurchaseOrders"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:core="sap.ui.core">
+	<Page
+		id="purchaseOrders"
+		title="{i18n>purchaseOrders}"
+		showNavButton="true"
+		navButtonPress="onNavBack">
+		<content>
+			<VBox class="sapUiMediumMargin">
+				<!-- Header Actions -->
+				<Panel headerText="{i18n>createNewPO}" class="sapUiResponsiveMargin">
+					<content>
+						<VBox class="sapUiSmallMargin">
+							<Label text="{i18n>selectProduct}" class="sapUiSmallMarginBottom"/>
+							<ComboBox id="productSelect" 
+								items="{/products}"
+								selectedKey="{/selectedProductGTIN}"
+								selectionChange="onProductChange"
+								class="sapUiSmallMarginBottom">
+								<core:Item key="{gtin}" text="{name} - {brand} ({gtin})"/>
+							</ComboBox>
+							
+							<Label text="{i18n>quantity}" class="sapUiSmallMarginBottom"/>
+							<Input id="quantityInput" 
+								value="{/quantity}"
+								type="Number"
+								placeholder="Enter quantity"
+								change="onQuantityChange"
+								class="sapUiSmallMarginBottom"/>
+							
+							<!-- SGTIN Preview Section -->
+							<VBox visible="{/showSGTINPreview}" class="sapUiMediumMarginTop">
+								<Label text="Generated SGTINs (Preview)" class="sapUiSmallMarginBottom"/>
+								<Panel class="sapUiTinyMargin" headerText="SGTINs will be created for this Purchase Order">
+									<content>
+										<List items="{/previewSGTINs}" 
+											noDataText="Enter quantity to preview SGTINs"
+											class="sapUiSmallMargin">
+											<StandardListItem 
+												title="{sgtin}"
+												description="Serial: {serialNumber}"
+												icon="sap-icon://bar-code"
+												type="Inactive"/>
+										</List>
+									</content>
+								</Panel>
+								<MessageStrip 
+									text="These SGTINs will be saved to the database when you create the purchase order."
+									type="Information"
+									class="sapUiSmallMarginTop"/>
+							</VBox>
+							
+							<Button text="{i18n>createPO}" 
+								type="Emphasized"
+								press="onCreatePO"
+								enabled="{/canCreatePO}"
+								class="sapUiSmallMarginTop"/>
+						</VBox>
+					</content>
+				</Panel>
+
+				<!-- Purchase Orders List -->
+				<Panel headerText="{i18n>existingPOs}" class="sapUiResponsiveMargin">
+					<content>
+						<Table id="poTable" 
+							items="{/purchaseOrders}"
+							growing="true"
+							growingThreshold="20"
+							mode="None">
+							<headerToolbar>
+								<Toolbar>
+									<Title text="{i18n>purchaseOrdersList}" level="H2"/>
+									<ToolbarSpacer/>
+									<SearchField id="poSearchField"
+										width="250px"
+										placeholder="Search by PO ID..."
+										search="onSearchPO"
+										liveChange="onSearchPO"
+										class="sapUiTinyMarginEnd"/>
+									<Button icon="sap-icon://refresh" press="onRefreshData"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column width="11%">
+									<Text text="{i18n>poId}"/>
+								</Column>
+								<Column width="20%">
+									<Text text="{i18n>product}"/>
+								</Column>
+								<Column width="9%" hAlign="Center">
+									<Button text="{i18n>quantity}" 
+										type="Transparent" 
+										press="onSortColumn"
+										customData:sortProperty="quantity"
+										xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"/>
+								</Column>
+								<Column width="20%">
+									<Button text="{i18n>status}" 
+										type="Transparent" 
+										press="onSortColumn"
+										customData:sortProperty="status"
+										xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"/>
+								</Column>
+								<Column width="16%">
+									<Button text="{i18n>createdAt}" 
+										type="Transparent" 
+										press="onSortColumn"
+										customData:sortProperty="created_at"
+										xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"/>
+								</Column>
+								<Column width="24%" hAlign="Begin">
+									<Text text="{i18n>actions}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem press="onPOSelect">
+									<cells>
+										<Text text="{po_id}"/>
+										<Text text="{product_name}"/>
+										<Text text="{quantity}" textAlign="Center"/>
+										<Text text="{status}"/>
+										<Text text="{path: 'created_at', formatter: '.formatDate'}"/>
+										<HBox justifyContent="Start" alignItems="Center">
+											<Button text="Details" 
+												type="Transparent"
+												press="onViewDetails"
+												class="sapUiTinyMarginEnd"
+												width="80px"/>
+											<Button text="Show SGTINs" 
+												type="Default"
+												press="onShowSGTINs"
+												width="110px"/>
+										</HBox>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</content>
+				</Panel>
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>

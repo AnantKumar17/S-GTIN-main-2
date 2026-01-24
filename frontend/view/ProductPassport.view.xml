@@ -1,0 +1,255 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.ProductPassport"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:core="sap.ui.core">
+	<Page
+		id="productPassport"
+		title="{i18n>digitalProductPassport}"
+		showNavButton="true"
+		navButtonPress="onNavBack">
+		<content>
+			<VBox class="sapUiMediumMargin productPassportContainer">
+				<!-- Product Header -->
+				<f:Card class="sapUiResponsiveMargin productHeaderCard">
+					<f:header>
+						<f:cards:Header
+							title="{/product/name}"
+							subtitle="{/product/brand}"
+							iconSrc="sap-icon://product"/>
+					</f:header>
+					<f:content>
+						<VBox class="sapUiMediumMargin">
+							<HBox class="sapUiSmallMarginBottom">
+								<VBox class="sapUiMediumMarginEnd productPassportQR">
+									<!-- QR Code placeholder -->
+									<VBox alignItems="Center" class="qrCodeContainer">
+										<Icon src="sap-icon://qr-code" size="6rem" class="sapUiMediumMarginBottom"/>
+										<Text text="{i18n>qrCode}" class="sapUiSmallText"/>
+									</VBox>
+								</VBox>
+								<VBox class="productDetails">
+									<Title text="{i18n>productInformation}" level="H2" class="sapUiMediumMarginBottom"/>
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>sgtin}:" class="passportLabel"/>
+										<Text text="{/sgtin}" class="passportValue"/>
+									</HBox>
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>gtin}:" class="passportLabel"/>
+										<Text text="{/product/gtin}" class="passportValue"/>
+									</HBox>
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>serialNumber}:" class="passportLabel"/>
+										<Text text="{/serialNumber}" class="passportValue"/>
+									</HBox>
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>status}:" class="passportLabel"/>
+										<ObjectStatus text="{/product/status}" 
+											state="{path: '/product/status', formatter: '.formatStatus'}" 
+											class="passportValue"/>
+									</HBox>
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>batch}:" class="passportLabel"/>
+										<Text text="{/product/batch}" class="passportValue"/>
+									</HBox>
+								</VBox>
+							</VBox>
+						</VBox>
+					</f:content>
+				</f:Card>
+
+				<!-- Manufacturing Information -->
+				<f:Card class="sapUiResponsiveMargin">
+					<f:header>
+						<f:cards:Header
+							title="{i18n>manufacturingDetails}"
+							iconSrc="sap-icon://factory"/>
+					</f:header>
+					<f:content>
+						<VBox class="sapUiMediumMargin">
+							<HBox class="sapUiSmallMarginBottom">
+								<Label text="{i18n>manufactureDate}:" class="passportLabel"/>
+								<Text text="{path: '/product/manufacture_date', formatter: '.formatDate'}" class="passportValue"/>
+							</HBox>
+							<HBox class="sapUiSmallMarginBottom">
+								<Label text="{i18n>factory}:" class="passportLabel"/>
+								<Text text="{/manufacturing/factory}" class="passportValue"/>
+							</HBox>
+							<HBox class="sapUiSmallMarginBottom">
+								<Label text="{i18n>countryOfOrigin}:" class="passportLabel"/>
+								<Text text="{/manufacturing/country}" class="passportValue"/>
+							</HBox>
+							<HBox class="sapUiSmallMarginBottom">
+								<Label text="{i18n>materials}:" class="passportLabel"/>
+								<Text text="{/manufacturing/materials}" class="passportValue"/>
+							</HBox>
+						</VBox>
+					</f:content>
+				</f:Card>
+
+				<!-- Sustainability Score -->
+				<f:Card class="sapUiResponsiveMargin">
+					<f:header>
+						<f:cards:Header
+							title="{i18n>sustainabilityScore}"
+							iconSrc="sap-icon://world"/>
+					</f:header>
+					<f:content>
+						<VBox class="sapUiMediumMargin">
+							<HBox alignItems="Center" class="sapUiMediumMarginBottom">
+								<VBox alignItems="Center" class="sapUiMediumMarginEnd">
+									<Title text="{/sustainability/score}/10" 
+										level="H1" 
+										class="sustainabilityScore"/>
+									<Text text="{i18n>overallScore}"/>
+								</VBox>
+								<VBox class="sustainabilityDetails">
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>carbonFootprint}:" class="passportLabel"/>
+										<Text text="{/sustainability/carbon_footprint} kg CO₂" class="passportValue"/>
+									</HBox>
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>recyclable}:" class="passportLabel"/>
+										<Text text="{/sustainability/recyclable}" class="passportValue"/>
+									</HBox>
+									<HBox class="sapUiSmallMarginBottom">
+										<Label text="{i18n>ethicalSourcing}:" class="passportLabel"/>
+										<ObjectStatus text="{/sustainability/ethical_sourcing}" 
+											state="Success" class="passportValue"/>
+									</HBox>
+								</VBox>
+							</HBox>
+							
+							<Title text="{i18n>certifications}" level="H3" class="sapUiMediumMarginBottom"/>
+							<HBox wrap="Wrap" class="certificationsBadges">
+								<f:Card class="certificationBadge sapUiSmallMarginEnd sapUiSmallMarginBottom"
+									visible="{/sustainability/certifications/organic}">
+									<f:content>
+										<VBox alignItems="Center" class="sapUiSmallMargin">
+											<Icon src="sap-icon://nutrition-activity" size="2rem" class="sapUiSmallMarginBottom"/>
+											<Text text="{i18n>organicCertified}"/>
+										</VBox>
+									</f:content>
+								</f:Card>
+								<f:Card class="certificationBadge sapUiSmallMarginEnd sapUiSmallMarginBottom"
+									visible="{/sustainability/certifications/fair_trade}">
+									<f:content>
+										<VBox alignItems="Center" class="sapUiSmallMargin">
+											<Icon src="sap-icon://customer-and-supplier" size="2rem" class="sapUiSmallMarginBottom"/>
+											<Text text="{i18n>fairTrade}"/>
+										</VBox>
+									</f:content>
+								</f:Card>
+								<f:Card class="certificationBadge sapUiSmallMarginEnd sapUiSmallMarginBottom"
+									visible="{/sustainability/certifications/recycled_materials}">
+									<f:content>
+										<VBox alignItems="Center" class="sapUiSmallMargin">
+											<Icon src="sap-icon://restart" size="2rem" class="sapUiSmallMarginBottom"/>
+											<Text text="{i18n>recycledMaterials}"/>
+										</VBox>
+									</f:content>
+								</f:Card>
+							</HBox>
+						</VBox>
+					</f:content>
+				</f:Card>
+
+				<!-- Lifecycle Timeline -->
+				<f:Card class="sapUiResponsiveMargin">
+					<f:header>
+						<f:cards:Header
+							title="{i18n>productLifecycle}"
+							iconSrc="sap-icon://journey-arrive"/>
+					</f:header>
+					<f:content>
+						<VBox class="sapUiMediumMargin">
+							<Timeline id="lifecycleTimeline" 
+								items="{/lifecycle/events}"
+								enableDoubleTap="false">
+								<content>
+									<TimelineItem 
+										dateTime="{path: 'timestamp', formatter: '.formatDateTime'}"
+										title="{event_type}"
+										text="{description}"
+										icon="{path: 'event_type', formatter: '.getEventIcon'}"
+										filterValue="{event_type}"/>
+								</content>
+							</Timeline>
+						</VBox>
+					</f:content>
+				</f:Card>
+
+				<!-- Supply Chain Transparency -->
+				<f:Card class="sapUiResponsiveMargin">
+					<f:header>
+						<f:cards:Header
+							title="{i18n>supplyChainTransparency}"
+							iconSrc="sap-icon://pipeline-analysis"/>
+					</f:header>
+					<f:content>
+						<VBox class="sapUiMediumMargin">
+							<Title text="{i18n>supplyChainJourney}" level="H3" class="sapUiMediumMarginBottom"/>
+							
+							<HBox class="supplyChainSteps" wrap="Wrap">
+								<VBox class="supplyChainStep sapUiMediumMarginEnd sapUiMediumMarginBottom"
+									visible="{/supplyChain/raw_materials}">
+									<Icon src="sap-icon://org-chart" size="2rem" class="sapUiSmallMarginBottom"/>
+									<Title text="{i18n>rawMaterials}" level="H4"/>
+									<Text text="{/supplyChain/raw_materials/location}"/>
+									<Text text="{/supplyChain/raw_materials/date}" class="sapUiSmallText"/>
+								</VBox>
+								
+								<VBox class="supplyChainStep sapUiMediumMarginEnd sapUiMediumMarginBottom"
+									visible="{/supplyChain/manufacturing}">
+									<Icon src="sap-icon://factory" size="2rem" class="sapUiSmallMarginBottom"/>
+									<Title text="{i18n>manufacturing}" level="H4"/>
+									<Text text="{/supplyChain/manufacturing/location}"/>
+									<Text text="{/supplyChain/manufacturing/date}" class="sapUiSmallText"/>
+								</VBox>
+								
+								<VBox class="supplyChainStep sapUiMediumMarginEnd sapUiMediumMarginBottom"
+									visible="{/supplyChain/distribution}">
+									<Icon src="sap-icon://shipping-status" size="2rem" class="sapUiSmallMarginBottom"/>
+									<Title text="{i18n>distribution}" level="H4"/>
+									<Text text="{/supplyChain/distribution/location}"/>
+									<Text text="{/supplyChain/distribution/date}" class="sapUiSmallText"/>
+								</VBox>
+								
+								<VBox class="supplyChainStep sapUiMediumMarginEnd sapUiMediumMarginBottom"
+									visible="{/supplyChain/retail}">
+									<Icon src="sap-icon://retail-store" size="2rem" class="sapUiSmallMarginBottom"/>
+									<Title text="{i18n>retail}" level="H4"/>
+									<Text text="{/supplyChain/retail/location}"/>
+									<Text text="{/supplyChain/retail/date}" class="sapUiSmallText"/>
+								</VBox>
+							</HBox>
+						</VBox>
+					</f:content>
+				</f:Card>
+
+				<!-- Actions -->
+				<Panel class="sapUiResponsiveMargin">
+					<content>
+						<HBox class="sapUiMediumMargin" justifyContent="Center" wrap="Wrap">
+							<Button text="{i18n>viewInInventory}" 
+								type="Emphasized"
+								press="onViewInInventory"
+								icon="sap-icon://inventory"
+								class="sapUiSmallMarginEnd"/>
+							<Button text="{i18n>reportIssue}" 
+								type="Default"
+								press="onReportIssue"
+								icon="sap-icon://message-warning"
+								class="sapUiSmallMarginEnd"/>
+							<Button text="{i18n>sharePassport}" 
+								type="Default"
+								press="onSharePassport"
+								icon="sap-icon://share"/>
+						</HBox>
+					</content>
+				</Panel>
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>

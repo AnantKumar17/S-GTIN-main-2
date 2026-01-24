@@ -1,0 +1,35 @@
+{
+  "name": "chatbot-service",
+  "version": "1.0.0",
+  "description": "Intelligent Q&A Chatbot Service with OpenRouter AI",
+  "main": "src/server-simplified.js",
+  "scripts": {
+    "start": "node src/server-simplified.js",
+    "dev": "nodemon src/server-simplified.js",
+    "start-old": "node src/server.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "chatbot",
+    "rag",
+    "nlp",
+    "ai"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "langchain": "^0.1.0",
+    "openai": "^4.24.1",
+    "pg": "^8.17.2",
+    "swagger-ui-express": "^5.0.0",
+    "yamljs": "^0.3.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2"
+  }
+}

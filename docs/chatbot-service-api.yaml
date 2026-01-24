@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  title: Chatbot Service API
+  description: Schema-aware, DB-first chatbot for natural language queries over local S-GTIN data
+  version: 2.0.0
+servers:
+  - url: http://localhost:3005/api
+    description: Development server
+
+tags:
+  - name: Chat
+    description: Chatbot Q&A operations
+
+paths:
+  /chat/query:
+    post:
+      tags:
+        - Chat
+      summary: Ask a question to the chatbot
+      description: |
+        DB-first pipeline. The service deterministically translates supported prompts into parameterized SQL aligned to the local schema (MANDT-scoped).
+        - Returns structured results from the database for in-domain queries (PO, inventory, SGTIN, sales, counterfeit).
+        - Uses LLM only when queries are out-of-domain or when no safe DB plan can be produced.
+        - LLM outputs are sanitized to avoid leaking internal schema details or raw SQL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mandt
+                - question
+              properties:
+                mandt:
+                  type: string
+                  example: "100"
+                question:
+                  type: string
+                  example: "Show open purchase orders"
+                conversationId:
+                  type: string
+                  description: Optional conversation ID for context and follow-ups
+      responses:
+        '200':
+          description: Chatbot response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                    example: "Found 2 purchase orders in OPEN status. Sample PO IDs:\n- PO PO_001: Premium Dark Chocolate Bar (OPEN, 0/10)\n- PO PO_002: Premium Dark Chocolate Bar (OPEN, 0/20)"
+                  data:
+                    type: object
+                    description: Structured data aligned to the query
+                    properties:
+                      type:
+                        type: string
+                        description: Intent/result type
+                        enum:
+                          - PURCHASE_ORDER
+                          - PURCHASE_ORDER_LIST
+                          - INVENTORY
+                          - MISSING_SGTINS
+                          - PO_SGTINS
+                          - SGTIN_TRACE
+                          - COUNTERFEIT_LOGS
+                          - SALES
+                          - LLM_RESPONSE
+                          - FALLBACK
+                          - OUT_OF_DOMAIN
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          description: Result rows; columns depend on the type (e.g., po_id, sgtin, product_name, status, location, sale_id)
+                  conversationId:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  method:
+                    type: string
+                    description: Processing path indicator
+                    enum:
+                      - database_planner
+                      - llm_after_db
+                      - llm_general
+                      - llm_out_of_domain
+                      - db_summary_fallback
+                      - out_of_domain_fallback
+        '400':
+          description: Invalid input (missing mandt or question)
+        '500':
+          description: Server error
+
+  /chat/history:
+    get:
+      tags:
+        - Chat
+      summary: Get chat conversation history
+      description: Returns previous chat interactions for a conversation (in-memory first, DB fallback if enabled)
+      parameters:
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+        - in: query
+          name: conversationId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversationId:
+                    type: string
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                          enum: [user, assistant]
+                        content:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+        '404':
+          description: Conversation not found
+        '500':
+          description: Server error

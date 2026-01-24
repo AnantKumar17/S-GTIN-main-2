@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: sgtin-postgres
+    environment:
+      POSTGRES_DB: sgtin_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # SGTIN Service
+  sgtin-service:
+    build: ./services/sgtin-service
+    container_name: sgtin-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=sgtin_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - MANDT=100
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # PO Service
+  po-service:
+    build: ./services/po-service
+    container_name: po-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=sgtin_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - MANDT=100
+      - SGTIN_SERVICE_URL=http://sgtin-service:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      sgtin-service:
+        condition: service_started
+    restart: unless-stopped
+
+  # Inventory Service
+  inventory-service:
+    build: ./services/inventory-service
+    container_name: inventory-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=sgtin_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - MANDT=100
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # POS Service
+  pos-service:
+    build: ./services/pos-service
+    container_name: pos-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=sgtin_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - MANDT=100
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Chatbot Service
+  chatbot-service:
+    build: ./services/chatbot-service
+    container_name: chatbot-service
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=sgtin_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - MANDT=100
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: sgtin-network

@@ -1,0 +1,180 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.PurchaseOrderDetail"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	xmlns:l="sap.ui.layout">
+	<Page
+		id="purchaseOrderDetail"
+		title="Purchase Order Details"
+		showNavButton="true"
+		navButtonPress="onNavBack">
+		<content>
+			<ScrollContainer height="100%" vertical="true">
+				<VBox class="sapUiMediumMargin">
+					<!-- PO Header Information -->
+					<Panel headerText="Order Information" class="sapUiResponsiveMargin">
+						<content>
+							<VBox class="sapUiSmallMargin">
+								<l:Grid defaultSpan="L6 M6 S12" hSpacing="1" vSpacing="1">
+									<VBox>
+										<Label text="Purchase Order ID" class="sapUiTinyMarginBottom"/>
+										<Text text="{/purchaseOrder/po_id}" class="sapUiSmallMarginBottom"/>
+									</VBox>
+									<VBox>
+										<Label text="Product" class="sapUiTinyMarginBottom"/>
+										<Text text="{/purchaseOrder/product_name}" class="sapUiSmallMarginBottom"/>
+									</VBox>
+									<VBox>
+										<Label text="GTIN" class="sapUiTinyMarginBottom"/>
+										<Text text="{/purchaseOrder/gtin}" class="sapUiSmallMarginBottom"/>
+									</VBox>
+									<VBox>
+										<Label text="Quantity" class="sapUiTinyMarginBottom"/>
+										<Text text="{/purchaseOrder/quantity}" class="sapUiSmallMarginBottom"/>
+									</VBox>
+									<VBox>
+										<Label text="Status" class="sapUiTinyMarginBottom"/>
+										<ObjectStatus text="{/purchaseOrder/status}" 
+											state="{path: '/purchaseOrder/status', formatter: '.formatStatus'}"/>
+									</VBox>
+									<VBox>
+										<Label text="Created" class="sapUiTinyMarginBottom"/>
+										<Text text="{path: '/purchaseOrder/created_at', formatter: '.formatDateTime'}" class="sapUiSmallMarginBottom"/>
+									</VBox>
+								</l:Grid>
+							</VBox>
+						</content>
+					</Panel>
+
+					<!-- Barcode Labels Section -->
+					<Panel headerText="Barcode Labels ({/labelCount} items)" class="sapUiResponsiveMargin">
+						<headerToolbar>
+							<Toolbar>
+								<Title text="Barcode Labels ({/labelCount} items)" level="H2"/>
+								<ToolbarSpacer/>
+								<Button 
+									icon="sap-icon://print" 
+									text="Print All Labels" 
+									type="Emphasized"
+									press="onPrintAllLabels"/>
+								<Button 
+									icon="sap-icon://download" 
+									text="Export Labels" 
+									press="onExportLabels"/>
+							</Toolbar>
+						</headerToolbar>
+						<content>
+							<VBox class="sapUiSmallMargin">
+								<MessageStrip
+									text="Scan these barcodes to track items through the supply chain. Each SGTIN uniquely identifies one unit."
+									type="Information"
+									showIcon="true"
+									class="sapUiSmallMarginBottom"/>
+								
+								<!-- Labels List -->
+								<List items="{/labels}" 
+									noDataText="No labels available for this purchase order"
+									class="sapUiSmallMargin">
+									<CustomListItem class="barcodeListItem">
+										<content>
+											<VBox class="sapUiSmallMargin barcodeCard">
+												<!-- SGTIN Header -->
+												<HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMarginBottom">
+													<VBox>
+														<Label text="SGTIN" class="barcodeLabel"/>
+														<Text text="{sgtin}" class="sgtin"/>
+													</VBox>
+													<HBox>
+														<Button 
+															icon="sap-icon://print" 
+															type="Transparent"
+															tooltip="Print this label"
+															press="onPrintSingleLabel"/>
+														<Button 
+															icon="sap-icon://download" 
+															type="Transparent"
+															tooltip="Download as image"
+															press="onDownloadLabel"/>
+													</HBox>
+												</HBox>
+
+												<!-- Product Info -->
+												<HBox class="sapUiTinyMarginBottom">
+													<VBox class="sapUiSmallMarginEnd" width="50%">
+														<Label text="Serial Number" class="barcodeLabel"/>
+														<Text text="{serialNumber}" class="barcodeValue"/>
+													</VBox>
+													<VBox width="50%">
+														<Label text="Status" class="barcodeLabel"/>
+														<ObjectStatus text="{status}" 
+															state="{path: 'status', formatter: '.formatStatus'}"/>
+													</VBox>
+												</HBox>
+
+												<l:Grid defaultSpan="L6 M6 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMarginTop">
+													<!-- Code 128 Barcode -->
+													<VBox class="barcodeImageContainer">
+														<Label text="Code 128 Barcode" class="barcodeLabel sapUiTinyMarginBottom"/>
+														<VBox alignItems="Center" class="barcodeImageBox">
+															<core:HTML 
+																content="&lt;img src='{barcode}' alt='Barcode' class='barcodeImage' /&gt;"
+																visible="{= !!${barcode}}"
+																class="sapUiTinyMargin"/>
+															<Text 
+																text="Barcode not generated" 
+																visible="{= !${barcode}}"
+																class="noBarcode"/>
+														</VBox>
+														<Text text="Scan this barcode at checkout" class="barcodeHint"/>
+													</VBox>
+
+													<!-- QR Code -->
+													<VBox class="barcodeImageContainer">
+														<Label text="QR Code" class="barcodeLabel sapUiTinyMarginBottom"/>
+														<VBox alignItems="Center" class="barcodeImageBox">
+															<core:HTML 
+																content="&lt;img src='{qrCode}' alt='QR Code' class='qrCodeImage' /&gt;"
+																visible="{= !!${qrCode}}"
+																class="sapUiTinyMargin"/>
+															<Text 
+																text="QR Code not generated" 
+																visible="{= !${qrCode}}"
+																class="noBarcode"/>
+														</VBox>
+														<Text text="Mobile-friendly scanning" class="barcodeHint"/>
+													</VBox>
+												</l:Grid>
+
+												<HBox class="sapUiSmallMarginTop">
+													<MessageStrip
+														text="Both barcode formats contain the complete SGTIN for item-level tracking"
+														type="Success"
+														showIcon="false"
+														class="barcodeInfo"/>
+												</HBox>
+											</VBox>
+										</content>
+									</CustomListItem>
+								</List>
+							</VBox>
+						</content>
+					</Panel>
+
+					<!-- Actions -->
+					<Panel class="sapUiResponsiveMargin">
+						<content>
+							<VBox class="sapUiSmallMargin">
+								<Button 
+									text="Back to Purchase Orders" 
+									icon="sap-icon://nav-back"
+									press="onNavBack"
+									class="sapUiTinyMargin"/>
+							</VBox>
+						</content>
+					</Panel>
+				</VBox>
+			</ScrollContainer>
+		</content>
+	</Page>
+</mvc:View>

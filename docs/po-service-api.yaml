@@ -1,0 +1,208 @@
+openapi: 3.0.0
+info:
+  title: Purchase Order Service API
+  description: Service for managing purchase orders with SGTIN generation
+  version: 1.0.0
+servers:
+  - url: http://localhost:3002/api
+    description: Development server
+
+tags:
+  - name: Purchase Orders
+    description: Purchase order management operations
+
+paths:
+  /purchase-orders:
+    post:
+      tags:
+        - Purchase Orders
+      summary: Create a new purchase order
+      description: Creates a purchase order and automatically generates SGTINs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mandt
+                - gtin
+                - quantity
+              properties:
+                mandt:
+                  type: string
+                  example: "100"
+                gtin:
+                  type: string
+                  example: "04012345678901"
+                quantity:
+                  type: integer
+                  example: 10
+                supplier:
+                  type: string
+                  example: "Supplier Inc."
+                expectedDeliveryDate:
+                  type: string
+                  format: date
+                warehouse:
+                  type: string
+                  example: "Warehouse A"
+      responses:
+        '201':
+          description: Purchase order created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  poId:
+                    type: string
+                    example: "PO-45000023"
+                  sgtins:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error
+
+    get:
+      tags:
+        - Purchase Orders
+      summary: List all purchase orders
+      description: Returns a list of purchase orders with optional filtering
+      parameters:
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [OPEN, PARTIALLY_RECEIVED, FULLY_RECEIVED, CANCELLED]
+        - in: query
+          name: gtin
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of purchase orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  purchaseOrders:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        poId:
+                          type: string
+                        gtin:
+                          type: string
+                        productName:
+                          type: string
+                        quantity:
+                          type: integer
+                        receivedQuantity:
+                          type: integer
+                        status:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+        '500':
+          description: Server error
+
+  /purchase-orders/{poId}:
+    get:
+      tags:
+        - Purchase Orders
+      summary: Get purchase order details
+      description: Returns detailed information about a specific purchase order
+      parameters:
+        - in: path
+          name: poId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+      responses:
+        '200':
+          description: Purchase order details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  poId:
+                    type: string
+                  gtin:
+                    type: string
+                  productName:
+                    type: string
+                  quantity:
+                    type: integer
+                  receivedQuantity:
+                    type: integer
+                  status:
+                    type: string
+                  sgtins:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sgtin:
+                          type: string
+                        status:
+                          type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        '404':
+          description: Purchase order not found
+        '500':
+          description: Server error
+
+  /purchase-orders/{poId}/labels:
+    get:
+      tags:
+        - Purchase Orders
+      summary: Download barcode labels
+      description: Generate and download printable barcode labels for all SGTINs in PO
+      parameters:
+        - in: path
+          name: poId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+      responses:
+        '200':
+          description: PDF file with barcode labels
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Purchase order not found
+        '500':
+          description: Server error

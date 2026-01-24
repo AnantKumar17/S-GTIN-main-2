@@ -1,0 +1,213 @@
+openapi: 3.0.0
+info:
+  title: SGTIN Generation Service API
+  description: Service for generating and validating Serialized GTINs (SGTINs) in GS1 format
+  version: 1.0.0
+  contact:
+    name: SGTIN Team
+servers:
+  - url: http://localhost:3001/api
+    description: Development server
+
+tags:
+  - name: SGTIN
+    description: SGTIN generation and validation operations
+
+paths:
+  /sgtin/generate:
+    post:
+      tags:
+        - SGTIN
+      summary: Generate SGTINs for a product
+      description: Generates multiple SGTINs in GS1 format (01{GTIN}21{Serial})
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mandt
+                - gtin
+                - quantity
+              properties:
+                mandt:
+                  type: string
+                  example: "100"
+                  description: Multi-tenant client identifier
+                gtin:
+                  type: string
+                  example: "04012345678901"
+                  description: Global Trade Item Number (14 digits)
+                quantity:
+                  type: integer
+                  example: 10
+                  description: Number of SGTINs to generate
+                batch:
+                  type: string
+                  example: "JAN26-ADIDAS-BLUE"
+                  description: Batch identifier
+                manufactureDate:
+                  type: string
+                  format: date
+                  example: "2026-01-15"
+                passport:
+                  type: object
+                  description: Digital product passport data
+                  properties:
+                    factory:
+                      type: string
+                      example: "Factory A, Vietnam"
+                    sustainability:
+                      type: string
+                      example: "Carbon Neutral"
+                    certifications:
+                      type: array
+                      items:
+                        type: string
+                      example: ["ISO 9001", "Fair Trade"]
+      responses:
+        '200':
+          description: SGTINs generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  sgtins:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sgtin:
+                          type: string
+                          example: "01040123456789012112345678"
+                        qrCode:
+                          type: string
+                          description: Base64 encoded QR code image
+                        barcode:
+                          type: string
+                          description: Base64 encoded barcode image
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Server error
+
+  /sgtin/validate/{sgtin}:
+    get:
+      tags:
+        - SGTIN
+      summary: Validate an SGTIN
+      description: Checks if an SGTIN exists and returns its status
+      parameters:
+        - in: path
+          name: sgtin
+          required: true
+          schema:
+            type: string
+          description: The SGTIN to validate
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+          description: Multi-tenant client identifier
+      responses:
+        '200':
+          description: SGTIN validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    example: true
+                  sgtin:
+                    type: string
+                    example: "01040123456789012112345678"
+                  status:
+                    type: string
+                    enum: [CREATED, IN_STOCK, SOLD, RETURNED, DAMAGED]
+                    example: "IN_STOCK"
+                  gtin:
+                    type: string
+                    example: "04012345678901"
+                  product:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      brand:
+                        type: string
+                      category:
+                        type: string
+        '404':
+          description: SGTIN not found
+        '500':
+          description: Server error
+
+  /sgtin/trace/{sgtin}:
+    get:
+      tags:
+        - SGTIN
+      summary: Get lifecycle trace of an SGTIN
+      description: Returns complete lifecycle history from creation to current state
+      parameters:
+        - in: path
+          name: sgtin
+          required: true
+          schema:
+            type: string
+          description: The SGTIN to trace
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+      responses:
+        '200':
+          description: Lifecycle trace
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sgtin:
+                    type: string
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        eventType:
+                          type: string
+                          enum: [CREATED, RECEIVED, SOLD, RETURNED, DAMAGED]
+                        timestamp:
+                          type: string
+                          format: date-time
+                        location:
+                          type: string
+                        metadata:
+                          type: object
+        '404':
+          description: SGTIN not found
+        '500':
+          description: Server error
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code

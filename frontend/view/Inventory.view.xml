@@ -1,0 +1,227 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.Inventory"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:core="sap.ui.core">
+	<Page
+		id="inventory"
+		title="{i18n>inventory}"
+		showNavButton="true"
+		navButtonPress="onNavBack">
+		<content>
+			<VBox class="sapUiMediumMargin">
+				<!-- Filter Section -->
+				<Panel headerText="{i18n>filters}" class="sapUiResponsiveMargin">
+					<content>
+						<VBox class="sapUiSmallMargin">
+							<!-- First Row: Hierarchical Business Filters (PO -> GTIN -> SGTIN) -->
+							<Text text="Primary Filters (Business Hierarchy)" class="sapUiSmallMarginBottom" 
+								design="Bold"/>
+							<HBox class="sapUiSmallMargin" wrap="Wrap">
+								<VBox class="sapUiSmallMarginEnd">
+									<Label text="1. Purchase Order (PO)" class="sapUiSmallMarginBottom"/>
+									<ComboBox id="poIdFilter" 
+										items="{/poIds}"
+										selectedKey="{/poIdFilter}"
+										change="onPoIdFilterChange"
+										placeholder="Select PO to filter products..."
+										width="280px"
+										tooltip="Select a Purchase Order to see only related products and items">
+										<core:Item key="" text="All Purchase Orders"/>
+										<core:Item key="{key}" text="{text}"/>
+									</ComboBox>
+								</VBox>
+								
+								<VBox class="sapUiSmallMarginEnd">
+									<Label text="2. Product (GTIN)" class="sapUiSmallMarginBottom"/>
+									<MultiComboBox id="gtinFilter" 
+										items="{/gtins}"
+										selectedKeys="{/gtinFilter}"
+										selectionChange="onFilterChange"
+										placeholder="Select product types..."
+										width="350px"
+										tooltip="Select specific product types (filtered by PO if selected)">
+										<core:Item key="{key}" text="{text}"/>
+									</MultiComboBox>
+								</VBox>
+								
+								<VBox class="sapUiSmallMarginEnd">
+									<Label text="3. Individual Item (SGTIN)" class="sapUiSmallMarginBottom"/>
+									<Input id="sgtinFilter" 
+										value="{/sgtinFilter}"
+										change="onSgtinFilterChange"
+										placeholder="Enter specific SGTIN..."
+										width="300px"
+										tooltip="Search for a specific serialized item (30-32 digits starting with 01)"/>
+								</VBox>
+							</HBox>
+							
+							<!-- Second Row: Additional Filters -->
+							<Text text="Additional Filters" class="sapUiSmallMarginTop sapUiSmallMarginBottom" 
+								design="Bold"/>
+							<HBox class="sapUiSmallMargin" wrap="Wrap">
+								<VBox class="sapUiSmallMarginEnd">
+									<Label text="Status" class="sapUiSmallMarginBottom"/>
+									<ComboBox id="statusFilter" 
+										selectedKey="{/statusFilter}"
+										change="onStatusFilterChange"
+										width="150px"
+										tooltip="Filter by item status">
+										<core:Item key="" text="All Statuses"/>
+										<core:Item key="CREATED" text="Created"/>
+										<core:Item key="IN_STOCK" text="In Stock"/>
+										<core:Item key="SOLD" text="Sold"/>
+									</ComboBox>
+								</VBox>
+								
+								<VBox class="sapUiSmallMarginEnd">
+									<Label text="Goods Receipt Period" class="sapUiSmallMarginBottom"/>
+									<ComboBox id="datePeriodFilter" 
+										selectedKey="{/datePeriodFilter}"
+										change="onDatePeriodChange"
+										width="200px"
+										tooltip="Filter by when items were received">
+										<core:Item key="" text="All Periods"/>
+										<core:Item key="custom" text="Custom Date Range"/>
+										<core:Item key="today" text="Today"/>
+										<core:Item key="thisweek" text="This Week"/>
+										<core:Item key="thismonth" text="This Month"/>
+										<core:Item key="last30days" text="Last 30 Days"/>
+										<core:Item key="last6months" text="Last 6 Months"/>
+										<core:Item key="thisyear" text="This Year"/>
+									</ComboBox>
+								</VBox>
+								
+								<VBox class="sapUiSmallMarginEnd"
+									  visible="{= ${/datePeriodFilter} === 'custom' }">
+									<Label text="From Date" class="sapUiSmallMarginBottom"/>
+									<DatePicker id="dateFromFilter" 
+										value="{/dateFromFilter}"
+										valueFormat="yyyy-MM-dd"
+										displayFormat="dd MMM yyyy"
+										change="onDateRangeChange"
+										placeholder="Select start date"
+										width="150px"/>
+								</VBox>
+								
+								<VBox class="sapUiSmallMarginEnd"
+									  visible="{= ${/datePeriodFilter} === 'custom' }">
+									<Label text="To Date" class="sapUiSmallMarginBottom"/>
+									<DatePicker id="dateToFilter" 
+										value="{/dateToFilter}"
+										valueFormat="yyyy-MM-dd"
+										displayFormat="dd MMM yyyy"
+										change="onDateRangeChange"
+										placeholder="Select end date"
+										width="150px"/>
+								</VBox>
+								
+								<VBox class="sapUiSmallMarginEnd" justifyContent="End">
+									<Button text="{i18n>clearFilters}" 
+										type="Default"
+										press="onClearFilters"
+										class="sapUiSmallMarginTop"/>
+								</VBox>
+							</HBox>
+						</VBox>
+					</content>
+				</Panel>
+
+				<!-- Inventory Summary -->
+				<Panel headerText="Inventory Summary" class="sapUiResponsiveMargin inventorySummaryPanel">
+					<content>
+						<HBox class="sapUiSmallMargin inventorySummaryContainer">
+							<VBox class="inventorySummaryTile inventoryTileTotalItems" alignItems="Center">
+								<core:Icon src="sap-icon://inventory" class="inventorySummaryIcon"/>
+								<Title text="{/summary/totalItems}" class="inventoryNumber totalItemsValue"/>
+								<Text text="Total Items" class="inventorySummaryLabel"/>
+							</VBox>
+							
+							<VBox class="inventorySummaryTile inventoryTileInStock" alignItems="Center">
+								<core:Icon src="sap-icon://product" class="inventorySummaryIcon"/>
+								<Title text="{/summary/inStock}" class="inventoryNumber inStockValue"/>
+								<Text text="In Stock" class="inventorySummaryLabel"/>
+							</VBox>
+							
+							<VBox class="inventorySummaryTile inventoryTileSold" alignItems="Center">
+								<core:Icon src="sap-icon://cart" class="inventorySummaryIcon"/>
+								<Title text="{/summary/sold}" class="inventoryNumber soldValue"/>
+								<Text text="Sold" class="inventorySummaryLabel"/>
+							</VBox>
+							
+							<VBox class="inventorySummaryTile inventoryTileCreated" alignItems="Center">
+								<core:Icon src="sap-icon://add" class="inventorySummaryIcon"/>
+								<Title text="{/summary/created}" class="inventoryNumber createdValue"/>
+								<Text text="Created" class="inventorySummaryLabel"/>
+							</VBox>
+						</HBox>
+					</content>
+				</Panel>
+
+				<!-- Inventory Table -->
+				<Panel headerText="{i18n>serializedItems}" class="sapUiResponsiveMargin">
+					<content>
+							<Table id="inventoryTable" 
+								items="{path: '/filteredInventory', sorter: {path: 'created_at', descending: true}}"
+								growing="true"
+								growingThreshold="50"
+								mode="None">
+							<headerToolbar>
+								<Toolbar class="inventoryTableToolbar">
+									<Text text="Items: {/filteredInventory/length}" class="sapUiSmallMarginEnd"/>
+									<ToolbarSpacer/>
+									<Button text="Export" 
+										press="onExportToExcel"
+										tooltip="{i18n>exportToExcel}"
+										class="sapUiSmallMarginBegin"/>
+									<Button text="Refresh" 
+										press="onRefreshInventory"
+										class="sapUiSmallMarginBegin"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="SGTIN"/>
+								</Column>
+								<Column>
+									<Text text="GTIN"/>
+								</Column>
+								<Column>
+									<Text text="Product Name"/>
+								</Column>
+								<Column>
+									<Text text="Brand"/>
+								</Column>
+								<Column>
+									<Text text="PO ID"/>
+								</Column>
+								<Column>
+									<Text text="Goods Receipt Date"/>
+								</Column>
+								<Column>
+									<Text text="Status"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem press="onItemSelect">
+									<cells>
+										<Text text="{sgtin}"/>
+										<Text text="{gtin}"/>
+										<Text text="{product_name}"/>
+										<Text text="{brand}"/>
+										<Text text="{po_id}"/>
+										<Text text="{path: 'goods_receipt_date', formatter: '.formatDate'}"/>
+										<ObjectStatus text="{status}" 
+											state="{path: 'status', formatter: '.formatStatus'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</content>
+				</Panel>
+
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>

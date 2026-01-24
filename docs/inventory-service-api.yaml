@@ -1,0 +1,182 @@
+openapi: 3.0.0
+info:
+  title: Inventory Service API
+  description: Service for managing goods receipts and inventory
+  version: 1.0.0
+servers:
+  - url: http://localhost:3003/api
+    description: Development server
+
+tags:
+  - name: Goods Receipt
+    description: Goods receipt operations
+  - name: Inventory
+    description: Inventory management operations
+
+paths:
+  /goods-receipts:
+    post:
+      tags:
+        - Goods Receipt
+      summary: Receive goods by scanning SGTINs
+      description: Records goods receipt and updates SGTIN status to IN_STOCK
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mandt
+                - poId
+                - sgtins
+                - warehouse
+              properties:
+                mandt:
+                  type: string
+                  example: "100"
+                poId:
+                  type: string
+                  example: "PO-45000023"
+                sgtins:
+                  type: array
+                  items:
+                    type: string
+                  example: ["01040123456789012112345678", "01040123456789012112345679"]
+                warehouse:
+                  type: string
+                  example: "Warehouse A"
+      responses:
+        '200':
+          description: Goods received successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  grId:
+                    type: string
+                    example: "GR-2026-0001"
+                  receivedCount:
+                    type: integer
+                  invalidSgtins:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sgtin:
+                          type: string
+                        reason:
+                          type: string
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error
+
+  /inventory:
+    get:
+      tags:
+        - Inventory
+      summary: Get inventory list
+      description: Returns list of all serialized items with filters
+      parameters:
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [CREATED, IN_STOCK, SOLD, RETURNED, DAMAGED]
+        - in: query
+          name: gtin
+          schema:
+            type: string
+        - in: query
+          name: batch
+          schema:
+            type: string
+        - in: query
+          name: location
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inventory list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sgtin:
+                          type: string
+                        gtin:
+                          type: string
+                        productName:
+                          type: string
+                        brand:
+                          type: string
+                        status:
+                          type: string
+                        location:
+                          type: string
+                        batch:
+                          type: string
+                        manufactureDate:
+                          type: string
+                          format: date
+                  totalCount:
+                    type: integer
+        '500':
+          description: Server error
+
+  /inventory/missing-sgtins:
+    get:
+      tags:
+        - Inventory
+      summary: Get products without SGTINs
+      description: Returns list of products that don't have serialized items yet
+      parameters:
+        - in: query
+          name: mandt
+          required: true
+          schema:
+            type: string
+            example: "100"
+        - in: query
+          name: brand
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Products without SGTINs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        gtin:
+                          type: string
+                        name:
+                          type: string
+                        brand:
+                          type: string
+                        category:
+                          type: string
+        '500':
+          description: Server error

@@ -1,0 +1,199 @@
+{
+	"_version": "1.59.0",
+	"sap.app": {
+		"id": "com.sgtin.lifecycle",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"dataSources": {
+			"sgtinService": {
+				"uri": "http://localhost:3001/api/",
+				"type": "JSON"
+			},
+			"poService": {
+				"uri": "http://localhost:3002/api/",
+				"type": "JSON"
+			},
+			"inventoryService": {
+				"uri": "http://localhost:3003/api/",
+				"type": "JSON"
+			},
+			"posService": {
+				"uri": "http://localhost:3004/api/",
+				"type": "JSON"
+			},
+			"chatbotService": {
+				"uri": "http://localhost:3005/api/",
+				"type": "JSON"
+			}
+		}
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"flexEnabled": true,
+		"dependencies": {
+			"minUI5Version": "1.60.0",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.ui.layout": {},
+				"sap.f": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "com.sgtin.lifecycle.i18n.i18n"
+				}
+			}
+		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"async": true,
+				"viewPath": "com.sgtin.lifecycle.view",
+				"controlAggregation": "pages",
+				"controlId": "app",
+				"clearControlAggregation": false
+			},
+			"routes": [
+				{
+					"name": "main",
+					"pattern": "",
+					"target": ["main"]
+				},
+				{
+					"name": "purchaseOrders",
+					"pattern": "purchase-orders",
+					"target": ["purchaseOrders"]
+				},
+				{
+					"name": "purchaseOrderDetail",
+					"pattern": "purchase-orders/{poId}",
+					"target": ["purchaseOrderDetail"]
+				},
+				{
+					"name": "inventory",
+					"pattern": "inventory",
+					"target": ["inventory"]
+				},
+				{
+					"name": "goodsReceipt",
+					"pattern": "goods-receipt",
+					"target": ["goodsReceipt"]
+				},
+				{
+					"name": "pos",
+					"pattern": "pos",
+					"target": ["pos"]
+				},
+				{
+					"name": "chatbot",
+					"pattern": "chatbot",
+					"target": ["chatbot"]
+				},
+				{
+					"name": "productPassport",
+					"pattern": "passport/{sgtin}",
+					"target": ["productPassport"]
+				}
+			],
+			"targets": {
+				"main": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "main",
+					"viewName": "Main"
+				},
+				"purchaseOrders": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "purchaseOrders",
+					"viewName": "PurchaseOrders"
+				},
+				"purchaseOrderDetail": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "purchaseOrderDetail",
+					"viewName": "PurchaseOrderDetail"
+				},
+				"inventory": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "inventory",
+					"viewName": "Inventory"
+				},
+				"goodsReceipt": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "goodsReceipt",
+					"viewName": "GoodsReceipt"
+				},
+				"pos": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "pos",
+					"viewName": "POS"
+				},
+				"chatbot": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "chatbot",
+					"viewName": "Chatbot"
+				},
+				"productPassport": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "productPassport",
+					"viewName": "ProductPassport"
+				}
+			}
+		},
+		"rootView": {
+			"viewName": "com.sgtin.lifecycle.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		}
+	}
+}

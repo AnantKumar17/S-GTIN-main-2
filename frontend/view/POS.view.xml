@@ -1,0 +1,226 @@
+<mvc:View
+	controllerName="com.sgtin.lifecycle.controller.POS"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:core="sap.ui.core">
+	<Page
+		id="pos"
+		title="{i18n>pointOfSale}"
+		showNavButton="true"
+		navButtonPress="onNavBack">
+		<content>
+			<VBox class="sapUiMediumMargin">
+				<!-- Sale Transaction Section -->
+				<Panel headerText="{i18n>newSaleTransaction}" class="sapUiResponsiveMargin">
+					<content>
+						<VBox class="sapUiSmallMargin">
+							<Label text="{i18n>storeId}" class="sapUiSmallMarginBottom"/>
+							<Input id="storeInput" 
+								value="{/storeId}"
+								placeholder="Enter store ID"
+								class="sapUiSmallMarginBottom"/>
+
+						<Label text="{i18n>scanItemSGTIN}" class="sapUiSmallMarginBottom"/>
+						<HBox class="sapUiSmallMarginBottom">
+							<Input id="sgtinScanInput" 
+								value="{/scannedSGTIN}"
+								placeholder="01{GTIN}21{Serial} or scan QR code"
+								class="sapUiSmallMarginEnd"
+								width="400px"
+								submit="onScanSGTIN"/>
+							<Button text="Upload QR Code (Image/PDF)" 
+								icon="sap-icon://upload"
+								type="Emphasized"
+								press="onUploadBarcodeImage"
+								class="sapUiSmallMarginEnd"/>
+							<Button text="{i18n>addItem}" 
+								type="Emphasized"
+								press="onScanSGTIN"/>
+						</HBox>
+						
+						<!-- Hidden File Uploader for QR Code Image -->
+						<core:HTML id="posBarcodeFileUploader" content="
+							&lt;input type='file' id='posBarcodeImageInput' accept='image/*,.pdf,application/pdf' style='display:none;' /&gt;
+						"/>							<!-- Camera Preview (placeholder) -->
+							<VBox id="posCameraBox" visible="false" class="sapUiSmallMarginTop">
+								<Panel class="scannerPanel" height="300px">
+									<content>
+										<VBox alignItems="Center" justifyContent="Center" height="100%">
+											<Title text="📷" level="H1" class="sapUiMediumMarginBottom"/>
+											<Text text="{i18n>cameraPlaceholder}" class="sapUiMediumMarginBottom"/>
+											<Button text="{i18n>stopScanning}" 
+												type="Default"
+												press="onStopCameraScanning"/>
+										</VBox>
+									</content>
+								</Panel>
+							</VBox>
+						</VBox>
+					</content>
+				</Panel>
+
+				<!-- Shopping Cart -->
+				<Panel headerText="{i18n>shoppingCart}" class="sapUiResponsiveMargin">
+					<content>
+						<Table id="cartTable" 
+							items="{/cartItems}"
+							mode="Delete"
+							delete="onRemoveCartItem">
+							<headerToolbar>
+								<Toolbar>
+									<Title text="{i18n>itemsInCart}" level="H2"/>
+									<ToolbarSpacer/>
+									<Text text="Items: {/cartItems/length}"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>sgtin}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>productName}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>brand}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>price}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>status}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{sgtin}"/>
+										<Text text="{product_name}"/>
+										<Text text="{brand}"/>
+										<Text text="€{price}"/>
+										<ObjectStatus text="{validation_status}" 
+											state="{path: 'validation_status', formatter: '.formatValidationStatus'}"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+
+						<!-- Cart Summary -->
+						<HBox class="sapUiSmallMarginTop sapUiSmallMargin" justifyContent="SpaceBetween">
+							<VBox>
+								<Text text="{i18n>totalItems}: {/cartSummary/totalItems}" class="sapUiSmallMarginBottom"/>
+								<Text text="{i18n>validItems}: {/cartSummary/validItems}" class="sapUiSmallMarginBottom"/>
+								<Text text="{i18n>invalidItems}: {/cartSummary/invalidItems}"/>
+							</VBox>
+							<VBox alignItems="End">
+								<Title text="{i18n>totalAmount}: €{/cartSummary/totalAmount}" level="H4"/>
+							</VBox>
+						</HBox>
+
+						<!-- Action Buttons -->
+						<HBox class="sapUiMediumMarginTop" justifyContent="End">
+							<Button text="{i18n>clearCart}" 
+								type="Default"
+								press="onClearCart"
+								class="sapUiSmallMarginEnd"
+								enabled="{= ${/cartItems/length} > 0}"/>
+							<Button text="{i18n>processSale}" 
+								type="Emphasized"
+								press="onProcessSale"
+								enabled="{= ${/cartSummary/validItems} > 0}"/>
+						</HBox>
+					</content>
+				</Panel>
+
+				<!-- Recent Sales -->
+				<Panel headerText="{i18n>recentSales}" class="sapUiResponsiveMargin">
+					<content>
+						<Table id="salesTable" 
+							items="{/recentSales}"
+							growing="true"
+							growingThreshold="10">
+							<headerToolbar>
+								<Toolbar>
+									<Title text="{i18n>salesHistory}" level="H2"/>
+									<ToolbarSpacer/>
+									<Button text="Refresh" press="onRefreshSales"/>
+								</Toolbar>
+							</headerToolbar>
+							<columns>
+								<Column>
+									<Text text="{i18n>saleId}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>storeId}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>itemsCount}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>totalAmount}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>soldAt}"/>
+								</Column>
+								<Column>
+									<Text text="{i18n>actions}"/>
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text text="{sale_id}"/>
+										<Text text="{store_id}"/>
+										<Text text="{item_count}"/>
+										<Text text="€{total_amount}"/>
+										<Text text="{path: 'sold_at', formatter: '.formatDateTime'}"/>
+										<Button text="{i18n>viewDetails}" 
+											type="Transparent"
+											press="onViewSaleDetails"/>
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</content>
+				</Panel>
+
+				<!-- Sale Details Dialog -->
+				<Dialog id="saleDetailsDialog" 
+					title="{i18n>saleDetails}"
+					contentWidth="600px"
+					resizable="true">
+					<content>
+						<VBox class="sapUiMediumMargin">
+							<Title text="Sale ID: {saleDetails>/sale_id}" level="H3" class="sapUiSmallMarginBottom"/>
+							<Text text="{i18n>store}: {saleDetails>/store_id}" class="sapUiSmallMarginBottom"/>
+							<Text text="{i18n>soldAt}: {path: 'saleDetails>/sold_at', formatter: '.formatDateTime'}" class="sapUiSmallMarginBottom"/>
+							<Text text="{i18n>totalAmount}: €{saleDetails>/total_amount}" class="sapUiMediumMarginBottom"/>
+							
+							<Table items="{saleDetails>/items}">
+								<columns>
+									<Column>
+										<Text text="{i18n>sgtin}"/>
+									</Column>
+									<Column>
+										<Text text="{i18n>productName}"/>
+									</Column>
+								</columns>
+								<items>
+									<ColumnListItem>
+										<cells>
+											<Text text="{saleDetails>sgtin}"/>
+											<Text text="{saleDetails>product_name}"/>
+										</cells>
+									</ColumnListItem>
+								</items>
+							</Table>
+						</VBox>
+					</content>
+					<buttons>
+						<Button text="{i18n>close}" press="onCloseSaleDetailsDialog"/>
+					</buttons>
+				</Dialog>
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>
