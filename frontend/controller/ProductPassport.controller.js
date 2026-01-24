@@ -39,7 +39,7 @@ sap.ui.define([
 		},
 
 		_loadProductData: function (sSGTIN) {
-			const sServiceUrl = "http://localhost:3003/api/inventory";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory";
 			
 			jQuery.ajax({
 				url: sServiceUrl,

@@ -5,8 +5,9 @@ sap.ui.define([
 	"sap/m/MessageBox",
 	"sap/m/Dialog",
 	"sap/m/Button",
-	"sap/m/Image"
-], function(Controller, JSONModel, MessageToast, MessageBox, Dialog, Button, Image) {
+	"sap/m/Image",
+	"../utils/ApiConfig"
+], function(Controller, JSONModel, MessageToast, MessageBox, Dialog, Button, Image, ApiConfig) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.SGTINLookup", {
@@ -33,7 +34,7 @@ sap.ui.define([
 			this.oRouter = this.getOwnerComponent().getRouter();
 			
 			// API configuration
-			this.baseUrl = "http://localhost:3006/api";
+			this.baseUrl = ApiConfig.getServiceUrl(ApiConfig.SGTIN_LOOKUP_SERVICE);
 			this.apiKey = "dev-api-key-12345";
 			this.mandt = "100";
 			

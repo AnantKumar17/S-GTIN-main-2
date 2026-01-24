@@ -3,8 +3,9 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
-	"../utils/EventBus"
-], function(Controller, JSONModel, MessageToast, MessageBox, EventBus) {
+	"../utils/EventBus",
+	"../utils/ApiConfig"
+], function(Controller, JSONModel, MessageToast, MessageBox, EventBus, ApiConfig) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.Main", {
@@ -137,7 +138,7 @@ sap.ui.define([
 		_loadPurchaseOrdersData: function() {
 			return new Promise((resolve) => {
 				jQuery.ajax({
-					url: "http://localhost:3002/api/purchase-orders?mandt=100",
+					url: ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders?mandt=100",
 					type: "GET",
 					headers: {
 						'X-API-Key': 'dev-api-key-12345'
@@ -186,7 +187,7 @@ sap.ui.define([
 		_loadInventoryItems: function() {
 			return new Promise((resolve) => {
 				jQuery.ajax({
-					url: "http://localhost:3003/api/inventory?mandt=100",
+					url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory?mandt=100",
 					type: "GET",
 					headers: {
 						'X-API-Key': 'dev-api-key-12345'
@@ -253,7 +254,7 @@ sap.ui.define([
 		_loadGoodsReceipts: function() {
 			return new Promise((resolve) => {
 				jQuery.ajax({
-					url: "http://localhost:3003/api/goods-receipts?mandt=100",
+					url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/goods-receipts?mandt=100",
 					type: "GET",
 					headers: {
 						'X-API-Key': 'dev-api-key-12345'
@@ -298,7 +299,7 @@ sap.ui.define([
 		_loadSalesData: function() {
 			return new Promise((resolve) => {
 				jQuery.ajax({
-					url: "http://localhost:3004/api/sales?mandt=100",
+					url: ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales?mandt=100",
 					type: "GET",
 					headers: {
 						'X-API-Key': 'dev-api-key-12345'
@@ -340,7 +341,7 @@ sap.ui.define([
 		_loadCounterfeitData: function() {
 			return new Promise((resolve) => {
 				jQuery.ajax({
-					url: "http://localhost:3004/api/sales/logs/counterfeit?mandt=100",
+					url: ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales/logs/counterfeit?mandt=100",
 					type: "GET",
 					headers: {
 						'X-API-Key': 'dev-api-key-12345'

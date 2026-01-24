@@ -53,7 +53,7 @@ sap.ui.define([
 		},
 
 		_loadPurchaseOrders: function () {
-			const sServiceUrl = "http://localhost:3002/api/purchase-orders?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -81,7 +81,7 @@ sap.ui.define([
 		},
 
 		_loadGoodsReceipts: function () {
-			const sServiceUrl = "http://localhost:3003/api/goods-receipts?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/goods-receipts?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -177,7 +177,7 @@ sap.ui.define([
 		sap.ui.core.BusyIndicator.show(0);
 		
 		// Call backend to decode QR code image
-		const sServiceUrl = "http://localhost:3003/api/goods-receipts/scan-image";			jQuery.ajax({
+		const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/goods-receipts/scan-image";			jQuery.ajax({
 				url: sServiceUrl,
 				type: "POST",
 				contentType: "application/json",
@@ -308,7 +308,7 @@ sap.ui.define([
 
 		_validateSGTINAgainstPO: function (sSGTIN, sGTIN, sSerial, sPOId) {
 			// First get the valid SGTINs for this Purchase Order
-			const sServiceUrl = `http://localhost:3002/api/purchase-orders/${sPOId}/labels?mandt=100`;
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + `/purchase-orders/${sPOId}/labels?mandt=100`;
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -355,7 +355,7 @@ sap.ui.define([
 		},
 
 		_validateSGTINWithBackend: function (sSGTIN, sGTIN, sSerial) {
-			const sServiceUrl = `http://localhost:3001/api/sgtin/validate/${sSGTIN}?mandt=100`;
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.SGTIN_SERVICE) + `/sgtin/validate/${sSGTIN}?mandt=100`;
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -469,7 +469,7 @@ sap.ui.define([
 		},
 
 		_processGoodsReceipt: function (oPayload) {
-			const sServiceUrl = "http://localhost:3003/api/goods-receipts";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/goods-receipts";
 
 			jQuery.ajax({
 				url: sServiceUrl,

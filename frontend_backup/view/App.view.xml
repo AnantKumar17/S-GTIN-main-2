@@ -1,9 +1,0 @@
-<mvc:View
-	controllerName="com.sgtin.lifecycle.controller.App"
-	xmlns="sap.m"
-	xmlns:mvc="sap.ui.core.mvc"
-	displayBlock="true">
-	<Shell id="shell">
-		<App id="app" busy="{app>/busy}"/>
-	</Shell>
-</mvc:View>

@@ -2,8 +2,9 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
-	"sap/ui/model/json/JSONModel"
-], function (Controller, MessageToast, MessageBox, JSONModel) {
+	"sap/ui/model/json/JSONModel",
+	"../utils/ApiConfig"
+], function (Controller, MessageToast, MessageBox, JSONModel, ApiConfig) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.Chatbot", {
@@ -113,7 +114,7 @@ sap.ui.define([
 			console.log("DEBUG: Querying intelligent chatbot service with:", sMessage);
 			
 			jQuery.ajax({
-				url: "http://localhost:3005/api/chat/query",
+				url: ApiConfig.getServiceUrl(ApiConfig.CHATBOT_SERVICE) + "/chat/query",
 				type: "POST",
 				headers: {
 					'Content-Type': 'application/json'
@@ -199,7 +200,7 @@ sap.ui.define([
 			console.log("DEBUG: Processing PO query:", sMessage);
 			
 			jQuery.ajax({
-				url: "http://localhost:3002/api/purchase-orders?mandt=100",
+				url: ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders?mandt=100",
 				type: "GET",
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'
@@ -295,7 +296,7 @@ sap.ui.define([
 			const batchId = batchMatch ? batchMatch[1] : null;
 
 			jQuery.ajax({
-				url: "http://localhost:3003/api/inventory?mandt=100",
+				url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "?mandt=100",
 				type: "GET",
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'
@@ -334,7 +335,7 @@ sap.ui.define([
 			console.log("DEBUG: Processing inventory query:", sMessage);
 
 			jQuery.ajax({
-				url: "http://localhost:3003/api/inventory?mandt=100",
+				url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "?mandt=100",
 				type: "GET",
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'
@@ -403,7 +404,7 @@ sap.ui.define([
 
 		_handleSalesQuery: function (sMessage) {
 			jQuery.ajax({
-				url: "http://localhost:3004/api/sales",
+				url: ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales",
 				type: "GET",
 				success: (data) => {
 					if (data.length === 0) {
@@ -452,7 +453,7 @@ sap.ui.define([
 		_handleMissingSGTINQuery: function () {
 			// Frontend fallback aligned to backend: query inventory service for products without serialized items
 			jQuery.ajax({
-				url: "http://localhost:3003/api/inventory/missing-sgtins",
+				url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory/missing-sgtins",
 				type: "GET",
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'

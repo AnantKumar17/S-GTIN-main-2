@@ -3,8 +3,9 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
-	"../utils/EventBus"
-], function (Controller, JSONModel, MessageToast, MessageBox, EventBus) {
+	"../utils/EventBus",
+	"../utils/ApiConfig"
+], function (Controller, JSONModel, MessageToast, MessageBox, EventBus, ApiConfig) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.PurchaseOrders", {
@@ -59,7 +60,7 @@ sap.ui.define([
 
 		_loadProductsThenPOs: function () {
 			// Load products from products master data table (not inventory/serialized_items)
-			const sServiceUrl = "http://localhost:3003/api/inventory/products?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory/products?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -110,7 +111,7 @@ sap.ui.define([
 
 		_loadProducts: function () {
 			// Load products from products master data table (not inventory/serialized_items)
-			const sServiceUrl = "http://localhost:3003/api/inventory/products?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory/products?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -151,7 +152,7 @@ sap.ui.define([
 		},
 
 		_loadPurchaseOrders: function () {
-			const sServiceUrl = "http://localhost:3002/api/purchase-orders?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -283,7 +284,7 @@ sap.ui.define([
 		_createPurchaseOrderWithSGTINs: function (sGTIN, iQuantity) {
 			// Create Purchase Order - PO Service automatically generates SGTINs internally
 			// DO NOT call SGTIN service separately - this causes duplicate SGTIN generation
-			const sServiceUrl = "http://localhost:3002/api/purchase-orders";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders";
 			const completePayload = {
 				mandt: "100",
 				gtin: sGTIN,
@@ -354,7 +355,7 @@ sap.ui.define([
 		// This prevents duplicate SGTIN generation that was causing data inconsistency
 
 		_createPurchaseOrder: function (oPayload) {
-			const sServiceUrl = "http://localhost:3002/api/purchase-orders";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders";
 
 			// Ensure all required fields are present
 			const completePayload = {
@@ -548,7 +549,7 @@ sap.ui.define([
 
 	_showSGTINs: function (oPO) {
 		// Use PO service labels endpoint instead of SGTIN service
-		const sServiceUrl = `http://localhost:3002/api/purchase-orders/${oPO.po_id}/labels?mandt=100`;
+		const sServiceUrl = `${ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE)}/purchase-orders/${oPO.po_id}/labels?mandt=100`;
 		
 		jQuery.ajax({
 			url: sServiceUrl,

@@ -83,7 +83,7 @@ sap.ui.define([
 
 		_loadInventory: function () {
 			// Build URL with current filters
-			let sServiceUrl = "http://localhost:3003/api/inventory?mandt=100";
+			let sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory?mandt=100";
 			
 			// Add filters to URL
 			const sStatusFilter = this.oModel.getProperty("/statusFilter");
@@ -143,7 +143,7 @@ sap.ui.define([
 		},
 
 		_loadPoIds: function () {
-			const sServiceUrl = "http://localhost:3003/api/inventory/po-ids?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory/po-ids?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,

@@ -3,8 +3,9 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
-	"sap/ui/core/format/DateFormat"
-], function (Controller, JSONModel, MessageToast, MessageBox, DateFormat) {
+	"sap/ui/core/format/DateFormat",
+	"../utils/ApiConfig"
+], function (Controller, JSONModel, MessageToast, MessageBox, DateFormat, ApiConfig) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.PurchaseOrderDetail", {
@@ -31,7 +32,7 @@ sap.ui.define([
 		_loadPurchaseOrderDetails: function (sPoId) {
 			this.oModel.setProperty("/loading", true);
 			
-			const sServiceUrl = "http://localhost:3002/api/purchase-orders/" + sPoId + "?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders/" + sPoId + "?mandt=100";
 
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -61,7 +62,7 @@ sap.ui.define([
 		},
 
 		_loadBarcodeLabels: function (sPoId) {
-			const sServiceUrl = "http://localhost:3002/api/purchase-orders/" + sPoId + "/labels?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders/" + sPoId + "/labels?mandt=100";
 
 			jQuery.ajax({
 				url: sServiceUrl,

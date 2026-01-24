@@ -3,8 +3,9 @@ sap.ui.define([
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/ui/model/json/JSONModel",
-	"../utils/EventBus"
-], function (Controller, MessageToast, MessageBox, JSONModel, EventBus) {
+	"../utils/EventBus",
+	"../utils/ApiConfig"
+], function (Controller, MessageToast, MessageBox, JSONModel, EventBus, ApiConfig) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.POS", {
@@ -33,7 +34,7 @@ sap.ui.define([
 		},
 
 		_loadRecentSales: function () {
-			const sServiceUrl = "http://localhost:3004/api/sales?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -130,7 +131,7 @@ sap.ui.define([
 			sap.ui.core.BusyIndicator.show(0);
 			
 			// Call backend to decode QR code image
-			const sServiceUrl = "http://localhost:3004/api/sales/scan-image";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales/scan-image";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -235,7 +236,7 @@ sap.ui.define([
 		},
 
 		_validateSGTINForSale: function (sSGTIN) {
-			const sServiceUrl = `http://localhost:3001/api/sgtin/validate/${sSGTIN}?mandt=100`;
+			const sServiceUrl = `${ApiConfig.getServiceUrl(ApiConfig.SGTIN_SERVICE)}/sgtin/validate/${sSGTIN}?mandt=100`;
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -260,7 +261,7 @@ sap.ui.define([
 		},
 
 		_checkItemAvailability: function (sSGTIN, oValidationData) {
-			const sServiceUrl = "http://localhost:3003/api/inventory?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -405,7 +406,7 @@ sap.ui.define([
 		},
 
 		_processSale: function (oSaleData) {
-			const sServiceUrl = "http://localhost:3004/api/sales";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales";
 
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -456,7 +457,7 @@ sap.ui.define([
 			const sSaleId = oContext.getProperty("sale_id");
 			
 			// Load sale details from database
-			const sServiceUrl = "http://localhost:3004/api/sales/" + encodeURIComponent(sSaleId) + "?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales/" + encodeURIComponent(sSaleId) + "?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,
