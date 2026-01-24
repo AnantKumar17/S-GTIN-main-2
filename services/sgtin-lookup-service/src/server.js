@@ -18,10 +18,10 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:8081', 'http://127.0.0.1:8081'],
+  origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'X-API-Key'],
-  credentials: true
+  credentials: false
 }));
 app.use(express.json());
 
