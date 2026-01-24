@@ -1,6 +1,6 @@
 const path = require('path');
 const axios = require('axios');
-const { PurchaseOrder, Product } = require(path.join(__dirname, '../../../../database/models'));
+const { PurchaseOrder, Product } = require(path.join(__dirname, '../../database/models'));
 
 const SGTIN_SERVICE_URL = process.env.SGTIN_SERVICE_URL || 'http://localhost:3001';
 
