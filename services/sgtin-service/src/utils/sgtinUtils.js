@@ -1,6 +1,6 @@
 const QRCode = require('qrcode');
 const bwipjs = require('bwip-js');
-const db = require('../../../../database/models/db');
+const db = require('../../database/models/db');
 
 /**
  * Generate SGTIN using PostgreSQL sequence (Production-ready)
