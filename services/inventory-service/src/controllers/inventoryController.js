@@ -1,8 +1,8 @@
 const path = require('path');
-const { SerializedItem, PurchaseOrder, Product, LifecycleEvent } = require(path.join(__dirname, '../../../../database/models'));
-const db = require(path.join(__dirname, '../../../../database/models/db'));
-const { decodeBarcode, validateSGTINFormat, parseSGTIN } = require(path.join(__dirname, '../../../../shared/utils/barcodeDecoder'));
-const barcodeScanner = require(path.join(__dirname, '../../../../shared/utils/barcodeScanner'));
+const { SerializedItem, PurchaseOrder, Product, LifecycleEvent } = require(path.join(__dirname, '../../database/models'));
+const db = require(path.join(__dirname, '../../database/models/db'));
+const { decodeBarcode, validateSGTINFormat, parseSGTIN } = require(path.join(__dirname, '../utils/barcodeDecoder'));
+const barcodeScanner = require(path.join(__dirname, '../utils/barcodeScanner'));
 
 /**
  * Get goods receipt history
