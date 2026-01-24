@@ -7,7 +7,7 @@ const {
   validateQuestion,
   sanitizeResponse
 } = require('../utils/systemKnowledge');
-const db = require(path.join(__dirname, '../../../../database/models/db'));
+const db = require(path.join(__dirname, '../../database/models/db'));
 
 // In-memory conversation storage (for production, use Redis or database)
 const conversations = new Map();

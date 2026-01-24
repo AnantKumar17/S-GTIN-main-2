@@ -1,5 +1,5 @@
 const GitHubModelsClient = require('./githubModelsClient');
-const db = require('../../../../database/models/db');
+const db = require('../../database/models/db');
 
 /**
  * LLM-First SQL Generator

@@ -5,7 +5,7 @@ const {
   validateQuestion,
   sanitizeResponse
 } = require('../utils/systemKnowledge');
-const db = require('../../../../database/models/db');
+const db = require('../../database/models/db');
 
 // In-memory conversation storage (for production, use Redis or database)
 const conversations = new Map();
