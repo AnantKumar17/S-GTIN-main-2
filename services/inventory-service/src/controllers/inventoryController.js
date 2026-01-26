@@ -1,6 +1,5 @@
 const path = require('path');
 const { SerializedItem, PurchaseOrder, Product, LifecycleEvent } = require(path.join(__dirname, '../../database/models'));
-const GoodsReceipt = require(path.join(__dirname, '../../database/models/GoodsReceipt'));
 const db = require(path.join(__dirname, '../../database/models/db'));
 const { decodeBarcode, validateSGTINFormat, parseSGTIN } = require(path.join(__dirname, '../utils/barcodeDecoder'));
 const barcodeScanner = require(path.join(__dirname, '../utils/barcodeScanner'));
@@ -20,27 +19,37 @@ exports.getGoodsReceipts = async (req, res, next) => {
       });
     }
 
-    // Use the actual goods_receipts table
-    const goodsReceiptModel = new GoodsReceipt(mandt);
-    const receipts = await goodsReceiptModel.findAll({
-      limit: 50,
-      offset: 0
-    });
+    // Query the actual goods_receipts table
+    const query = `
+      SELECT 
+        gr_id,
+        po_id,
+        warehouse,
+        received_quantity as items_count,
+        received_at,
+        received_by
+      FROM goods_receipts
+      WHERE mandt = $1
+      ORDER BY received_at DESC
+      LIMIT 50
+    `;
+
+    const result = await db.query(query, [mandt]);
 
     // Format the results to match the expected frontend structure
-    const formattedReceipts = receipts.map(receipt => ({
-      gr_id: receipt.gr_id,
-      po_id: receipt.po_id,
-      warehouse: receipt.warehouse,
-      items_count: parseInt(receipt.received_quantity),
-      received_at: receipt.received_at,
-      supplier: receipt.supplier || 'Unknown'
+    const receipts = result.rows.map(row => ({
+      gr_id: row.gr_id,
+      po_id: row.po_id,
+      warehouse: row.warehouse,
+      items_count: parseInt(row.items_count),
+      received_at: row.received_at,
+      supplier: row.received_by || 'Unknown'
     }));
 
     res.status(200).json({
       success: true,
-      count: formattedReceipts.length,
-      receipts: formattedReceipts
+      count: receipts.length,
+      receipts: receipts
     });
 
   } catch (error) {
@@ -122,10 +131,18 @@ exports.receiveGoods = async (req, res, next) => {
     }
 
     const lifecycleEventModel = new LifecycleEvent(mandt);
-    const goodsReceiptModel = new GoodsReceipt(mandt);
 
     // Generate goods receipt ID
-    const grId = await goodsReceiptModel.generateGrId(poId);
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
+    const sequenceQuery = `
+      SELECT COALESCE(MAX(CAST(SUBSTRING(gr_id FROM 'GR-\\d{8}-${poId}-(\\d+)') FROM '\\d+') AS INTEGER), 0) + 1 as next_seq
+      FROM goods_receipts
+      WHERE mandt = $1 AND gr_id LIKE 'GR-${dateStr}-${poId}-%'
+    `;
+    const sequenceResult = await client.query(sequenceQuery, [mandt]);
+    const sequence = sequenceResult.rows[0].next_seq || 1;
+    const grId = `GR-${dateStr}-${poId}-${sequence.toString().padStart(3, '0')}`;
 
     // Update each SGTIN status to IN_STOCK
     for (const sgtin of sgtins) {
@@ -147,17 +164,26 @@ exports.receiveGoods = async (req, res, next) => {
     await purchaseOrderModel.updateReceivedQuantity(poId, sgtins.length);
 
     // Create goods receipt record
-    const goodsReceipt = await goodsReceiptModel.create({
-      gr_id: grId,
-      po_id: poId,
-      warehouse: location,
-      received_quantity: sgtins.length,
-      received_by: receivedBy || null
-    });
+    const goodsReceiptQuery = `
+      INSERT INTO goods_receipts
+      (mandt, gr_id, po_id, warehouse, received_quantity, received_by)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `;
+    const goodsReceiptResult = await client.query(goodsReceiptQuery, [
+      mandt, grId, poId, location, sgtins.length, receivedBy || null
+    ]);
+    const goodsReceipt = goodsReceiptResult.rows[0];
 
     // Create goods receipt to SGTIN mappings
     for (const sgtin of sgtins) {
-      await goodsReceiptModel.addSgtinMapping(grId, sgtin);
+      const mappingQuery = `
+        INSERT INTO gr_sgtin_mapping
+        (mandt, gr_id, sgtin)
+        VALUES ($1, $2, $3)
+        RETURNING *
+      `;
+      await client.query(mappingQuery, [mandt, grId, sgtin]);
     }
 
     await client.query('COMMIT');
