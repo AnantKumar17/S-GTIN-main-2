@@ -64,15 +64,33 @@ exports.create = async (req, res, next) => {
         passport
       }, {
         headers: {
-          'X-API-Key': process.env.API_KEY
-        }
+          'X-API-Key': process.env.API_KEY || 'dev-api-key-12345'
+        },
+        timeout: 30000 // 30 second timeout
       });
     } catch (error) {
       console.error('Error calling SGTIN service:', error.message);
+      console.error('SGTIN Service URL:', SGTIN_SERVICE_URL);
+      console.error('API Key used:', process.env.API_KEY || 'dev-api-key-12345');
+      
+      // Provide more detailed error information
+      let errorMessage = 'Failed to generate SGTINs. Please try again.';
+      if (error.response) {
+        console.error('SGTIN Service Response:', error.response.status, error.response.data);
+        errorMessage = `SGTIN service returned error: ${error.response.status}`;
+      } else if (error.request) {
+        console.error('SGTIN Service Request:', error.request);
+        errorMessage = 'Unable to reach SGTIN service. Please check the service URL.';
+      }
+      
       return res.status(500).json({
         success: false,
-        error: 'Failed to generate SGTINs. Please try again.',
-        poId: po.po_id
+        error: errorMessage,
+        poId: po.po_id,
+        details: {
+          sgtinServiceUrl: SGTIN_SERVICE_URL,
+          apiStatus: error.response ? error.response.status : 'No response'
+        }
       });
     }
 
