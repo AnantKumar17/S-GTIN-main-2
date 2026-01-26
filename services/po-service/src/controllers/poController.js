@@ -2,7 +2,7 @@ const path = require('path');
 const axios = require('axios');
 const { PurchaseOrder, Product } = require(path.join(__dirname, '../../database/models'));
 
-const SGTIN_SERVICE_URL = process.env.SGTIN_SERVICE_URL || 'http://localhost:3001';
+const SGTIN_SERVICE_URL = process.env.SGTIN_SERVICE_URL || 'https://sgtin-sgtin-service.vercel.app';
 
 /**
  * Create purchase order and generate SGTINs

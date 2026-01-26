@@ -4,8 +4,9 @@ sap.ui.define([
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"../utils/EventBus",
-	"../utils/ApiConfig"
-], function (Controller, JSONModel, MessageToast, MessageBox, EventBus, ApiConfig) {
+	"../utils/ApiConfig",
+	"../utils/ErrorHandler"
+], function (Controller, JSONModel, MessageToast, MessageBox, EventBus, ApiConfig, ErrorHandler) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.PurchaseOrders", {

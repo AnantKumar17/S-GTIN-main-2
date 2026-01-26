@@ -7,10 +7,10 @@ const axios = require('axios');
 class QueryAnalyzer {
   constructor(mandt) {
     this.mandt = mandt;
-    this.sgtinServiceUrl = process.env.SGTIN_SERVICE_URL || 'http://localhost:3001';
-    this.poServiceUrl = process.env.PO_SERVICE_URL || 'http://localhost:3002';
-    this.inventoryServiceUrl = process.env.INVENTORY_SERVICE_URL || 'http://localhost:3003';
-    this.posServiceUrl = process.env.POS_SERVICE_URL || 'http://localhost:3004';
+    this.sgtinServiceUrl = process.env.SGTIN_SERVICE_URL || 'https://sgtin-sgtin-service.vercel.app';
+    this.poServiceUrl = process.env.PO_SERVICE_URL || 'https://sgtin-po-service.vercel.app';
+    this.inventoryServiceUrl = process.env.INVENTORY_SERVICE_URL || 'https://sgtin-inventory-service.vercel.app';
+    this.posServiceUrl = process.env.POS_SERVICE_URL || 'https://sgtin-pos-service.vercel.app';
     this.apiKey = process.env.API_KEY || 'dev-api-key-12345';
   }
 

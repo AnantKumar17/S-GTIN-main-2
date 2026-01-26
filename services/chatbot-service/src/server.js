@@ -28,10 +28,10 @@ const openaiClient = new OpenAI({
 
 // Service URLs configuration
 const services = {
-  sgtin: process.env.SGTIN_SERVICE_URL || 'http://localhost:3001',
-  po: process.env.PO_SERVICE_URL || 'http://localhost:3002', 
-  inventory: process.env.INVENTORY_SERVICE_URL || 'http://localhost:3003',
-  pos: process.env.POS_SERVICE_URL || 'http://localhost:3004'
+  sgtin: process.env.SGTIN_SERVICE_URL || 'https://sgtin-sgtin-service.vercel.app',
+  po: process.env.PO_SERVICE_URL || 'https://sgtin-po-service.vercel.app', 
+  inventory: process.env.INVENTORY_SERVICE_URL || 'https://sgtin-inventory-service.vercel.app',
+  pos: process.env.POS_SERVICE_URL || 'https://sgtin-pos-service.vercel.app'
 };
 
 app.use(cors());

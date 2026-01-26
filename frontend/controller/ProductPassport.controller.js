@@ -2,8 +2,10 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
-	"sap/ui/model/json/JSONModel"
-], function (Controller, MessageToast, MessageBox, JSONModel) {
+	"sap/ui/model/json/JSONModel",
+	"../utils/ApiConfig",
+	"../utils/ErrorHandler"
+], function (Controller, MessageToast, MessageBox, JSONModel, ApiConfig, ErrorHandler) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.ProductPassport", {

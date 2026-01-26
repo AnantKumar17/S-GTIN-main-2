@@ -1,5 +1,5 @@
 const path = require('path');
-const { SerializedItem, PurchaseOrder, Product, LifecycleEvent } = require(path.join(__dirname, '../../database/models'));
+const { SerializedItem, PurchaseOrder, Product, LifecycleEvent, GoodsReceipt } = require(path.join(__dirname, '../../database/models'));
 const db = require(path.join(__dirname, '../../database/models/db'));
 const { decodeBarcode, validateSGTINFormat, parseSGTIN } = require(path.join(__dirname, '../utils/barcodeDecoder'));
 const barcodeScanner = require(path.join(__dirname, '../utils/barcodeScanner'));
@@ -19,43 +19,27 @@ exports.getGoodsReceipts = async (req, res, next) => {
       });
     }
 
-    // Query to get goods receipts from lifecycle events
-    // We'll group RECEIVED events by PO and date to create receipt records
-    const query = `
-      SELECT 
-        po.po_id,
-        COUNT(le.sgtin) as items_count,
-        le.location as warehouse,
-        DATE(le.created_at) as received_date,
-        MIN(le.created_at) as received_at,
-        po.supplier,
-        'GR-' || TO_CHAR(MIN(le.created_at), 'YYYY-MM-DD') || '-' || po.po_id as gr_id
-      FROM lifecycle_events le
-      JOIN po_sgtin_mapping psm ON le.sgtin = psm.sgtin AND le.mandt = psm.mandt
-      JOIN purchase_orders po ON psm.po_id = po.po_id AND psm.mandt = po.mandt
-      WHERE le.mandt = $1 
-        AND le.event_type = 'RECEIVED'
-      GROUP BY po.po_id, le.location, DATE(le.created_at), po.supplier
-      ORDER BY MIN(le.created_at) DESC
-      LIMIT 50
-    `;
-
-    const result = await db.query(query, [mandt]);
+    // Use the actual goods_receipts table
+    const goodsReceiptModel = new GoodsReceipt(mandt);
+    const receipts = await goodsReceiptModel.findAll({
+      limit: 50,
+      offset: 0
+    });
 
     // Format the results to match the expected frontend structure
-    const receipts = result.rows.map(row => ({
-      gr_id: row.gr_id,
-      po_id: row.po_id,
-      warehouse: row.warehouse,
-      items_count: parseInt(row.items_count),
-      received_at: row.received_at,
-      supplier: row.supplier || 'Unknown'
+    const formattedReceipts = receipts.map(receipt => ({
+      gr_id: receipt.gr_id,
+      po_id: receipt.po_id,
+      warehouse: receipt.warehouse,
+      items_count: parseInt(receipt.received_quantity),
+      received_at: receipt.received_at,
+      supplier: receipt.supplier || 'Unknown'
     }));
 
     res.status(200).json({
       success: true,
-      count: receipts.length,
-      receipts: receipts
+      count: formattedReceipts.length,
+      receipts: formattedReceipts
     });
 
   } catch (error) {
@@ -137,11 +121,15 @@ exports.receiveGoods = async (req, res, next) => {
     }
 
     const lifecycleEventModel = new LifecycleEvent(mandt);
-    
+    const goodsReceiptModel = new GoodsReceipt(mandt);
+
+    // Generate goods receipt ID
+    const grId = await goodsReceiptModel.generateGrId(poId);
+
     // Update each SGTIN status to IN_STOCK
     for (const sgtin of sgtins) {
       await serializedItemModel.updateStatus(sgtin, 'IN_STOCK', location);
-      
+
       // Create lifecycle event
       await lifecycleEventModel.createEvent({
         sgtin,
@@ -157,6 +145,20 @@ exports.receiveGoods = async (req, res, next) => {
     // Update PO received quantity
     await purchaseOrderModel.updateReceivedQuantity(poId, sgtins.length);
 
+    // Create goods receipt record
+    const goodsReceipt = await goodsReceiptModel.create({
+      gr_id: grId,
+      po_id: poId,
+      warehouse: location,
+      received_quantity: sgtins.length,
+      received_by: receivedBy || null
+    });
+
+    // Create goods receipt to SGTIN mappings
+    for (const sgtin of sgtins) {
+      await goodsReceiptModel.addSgtinMapping(grId, sgtin);
+    }
+
     await client.query('COMMIT');
 
     // Calculate new received quantity for status determination
@@ -166,6 +168,7 @@ exports.receiveGoods = async (req, res, next) => {
       success: true,
       message: `Successfully received ${sgtins.length} item(s)`,
       goodsReceipt: {
+        grId,
         poId,
         receivedCount: sgtins.length,
         location,

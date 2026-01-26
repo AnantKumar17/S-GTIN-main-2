@@ -7,6 +7,7 @@ const SerializedItem = require('./SerializedItem');
 const PurchaseOrder = require('./PurchaseOrder');
 const Sale = require('./Sale');
 const LifecycleEvent = require('./LifecycleEvent');
+const GoodsReceipt = require('./GoodsReceipt');
 
 /**
  * Get all models for a specific MANDT
@@ -20,6 +21,7 @@ function getModels(mandt = process.env.MANDT || '100') {
     PurchaseOrder: new PurchaseOrder(mandt),
     Sale: new Sale(mandt),
     LifecycleEvent: new LifecycleEvent(mandt),
+    GoodsReceipt: new GoodsReceipt(mandt),
   };
 }
 
@@ -31,5 +33,6 @@ module.exports = {
   PurchaseOrder,
   Sale,
   LifecycleEvent,
+  GoodsReceipt,
   getModels
 };

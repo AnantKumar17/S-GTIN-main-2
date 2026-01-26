@@ -3,8 +3,10 @@ sap.ui.define([
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/ui/model/json/JSONModel",
-	"../utils/EventBus"
-], function (Controller, MessageToast, MessageBox, JSONModel, EventBus) {
+	"../utils/EventBus",
+	"../utils/ApiConfig",
+	"../utils/ErrorHandler"
+], function (Controller, MessageToast, MessageBox, JSONModel, EventBus, ApiConfig, ErrorHandler) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.GoodsReceipt", {

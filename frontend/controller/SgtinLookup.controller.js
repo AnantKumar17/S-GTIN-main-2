@@ -6,8 +6,9 @@ sap.ui.define([
 	"sap/m/Dialog",
 	"sap/m/Button",
 	"sap/m/Image",
-	"../utils/ApiConfig"
-], function(Controller, JSONModel, MessageToast, MessageBox, Dialog, Button, Image, ApiConfig) {
+	"../utils/ApiConfig",
+	"../utils/ErrorHandler"
+], function(Controller, JSONModel, MessageToast, MessageBox, Dialog, Button, Image, ApiConfig, ErrorHandler) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.SGTINLookup", {

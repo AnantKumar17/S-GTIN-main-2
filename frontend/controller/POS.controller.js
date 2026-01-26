@@ -35,6 +35,7 @@ sap.ui.define([
 
 		_loadRecentSales: function () {
 			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.POS_SERVICE) + "/sales?mandt=100";
+			console.log("Loading recent sales from:", sServiceUrl);
 			
 			jQuery.ajax({
 				url: sServiceUrl,
@@ -42,6 +43,8 @@ sap.ui.define([
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'
 				},
+				dataType: "json",
+				timeout: 8000,
 				success: (response) => {
 					console.log("Sales API response:", response);
 					// Handle the structured response from our API
@@ -50,15 +53,22 @@ sap.ui.define([
 					MessageToast.show("Loaded " + salesData.length + " sales from database");
 				},
 				error: (xhr, status, error) => {
-					console.error("Failed to load sales:", xhr, status, error);
+					console.error("Failed to load sales - Status:", status, "Error:", error, "XHR:", xhr);
 					this.oModel.setProperty("/recentSales", []);
 					let errorMessage = "Failed to load sales from database";
-					try {
-						const errorResponse = JSON.parse(xhr.responseText);
-						errorMessage = errorResponse.error || errorMessage;
-					} catch (e) {
-						errorMessage = "Backend service unavailable. Please ensure POS service is running on port 3004.";
+					if (status === "timeout") {
+						errorMessage = "Request timeout. POS service not responding.";
+					} else if (xhr.status === 0) {
+						errorMessage = "Network error. Cannot reach POS service at " + sServiceUrl;
+					} else {
+						try {
+							const errorResponse = JSON.parse(xhr.responseText);
+							errorMessage = errorResponse.error || errorMessage;
+						} catch (e) {
+							errorMessage = "Backend service error (HTTP " + xhr.status + "). URL: " + sServiceUrl;
+						}
 					}
+					console.error("Error message:", errorMessage);
 					MessageBox.error(errorMessage);
 				}
 			});

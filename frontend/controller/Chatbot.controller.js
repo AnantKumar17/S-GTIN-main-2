@@ -3,8 +3,9 @@ sap.ui.define([
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/ui/model/json/JSONModel",
-	"../utils/ApiConfig"
-], function (Controller, MessageToast, MessageBox, JSONModel, ApiConfig) {
+	"../utils/ApiConfig",
+	"../utils/ErrorHandler"
+], function (Controller, MessageToast, MessageBox, JSONModel, ApiConfig, ErrorHandler) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.Chatbot", {
@@ -112,9 +113,10 @@ sap.ui.define([
 
 		_queryIntelligentChatbot: function (sMessage) {
 			console.log("DEBUG: Querying intelligent chatbot service with:", sMessage);
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.CHATBOT_SERVICE) + "/chat/query";
 			
 			jQuery.ajax({
-				url: ApiConfig.getServiceUrl(ApiConfig.CHATBOT_SERVICE) + "/chat/query",
+				url: sServiceUrl,
 				type: "POST",
 				headers: {
 					'Content-Type': 'application/json'
@@ -124,6 +126,7 @@ sap.ui.define([
 					question: sMessage,
 					conversationId: this._conversationId || null
 				}),
+				timeout: 10000,
 				success: (chatResponse) => {
 					console.log("DEBUG: Chatbot service response:", chatResponse);
 					
@@ -145,7 +148,8 @@ sap.ui.define([
 					this._addMessage("assistant", formattedAnswer, structuredData);
 				},
 				error: (xhr, status, error) => {
-					console.error("Chatbot service error:", error, xhr.responseText);
+					const errorMsg = ErrorHandler.getErrorMessage(xhr, status, error, sServiceUrl, "query intelligent chatbot");
+					console.error(errorMsg);
 					
 					// Fallback to direct API calls when chatbot service fails
 					console.log("DEBUG: Falling back to direct API calls");
@@ -198,13 +202,15 @@ sap.ui.define([
 		_handlePOStatusQuery: function (sMessage) {
 			const sLowerMessage = sMessage.toLowerCase();
 			console.log("DEBUG: Processing PO query:", sMessage);
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders?mandt=100";
 			
 			jQuery.ajax({
-				url: ApiConfig.getServiceUrl(ApiConfig.PO_SERVICE) + "/purchase-orders?mandt=100",
+				url: sServiceUrl,
 				type: "GET",
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'
 				},
+				timeout: 8000,
 				success: (apiResponse) => {
 					const data = apiResponse.purchaseOrders || apiResponse || [];
 					console.log("DEBUG: Received PO data:", data.length, "purchase orders");
@@ -283,8 +289,9 @@ sap.ui.define([
 					}
 				},
 				error: (xhr, status, error) => {
-					console.error("PO API Error:", error);
-					this._addMessage("assistant", "I'm having trouble accessing purchase order data right now. Please check if the PO service is running on port 3002.");
+					const errorMsg = ErrorHandler.getErrorMessage(xhr, status, error, sServiceUrl, "query purchase orders");
+					console.error(errorMsg);
+					this._addMessage("assistant", "I'm having trouble accessing purchase order data. " + errorMsg);
 				}
 			});
 		},

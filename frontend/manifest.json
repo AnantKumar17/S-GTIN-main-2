@@ -11,27 +11,27 @@
 		"description": "{{appDescription}}",
 		"dataSources": {
 			"sgtinService": {
-				"uri": "http://localhost:3001/api/",
+				"uri": "${env.SGTIN_SERVICE_URL}/api/",
 				"type": "JSON"
 			},
 			"poService": {
-				"uri": "http://localhost:3002/api/",
+				"uri": "${env.PO_SERVICE_URL}/api/",
 				"type": "JSON"
 			},
 			"inventoryService": {
-				"uri": "http://localhost:3003/api/",
+				"uri": "${env.INVENTORY_SERVICE_URL}/api/",
 				"type": "JSON"
 			},
 			"posService": {
-				"uri": "http://localhost:3004/api/",
+				"uri": "${env.POS_SERVICE_URL}/api/",
 				"type": "JSON"
 			},
 			"chatbotService": {
-				"uri": "http://localhost:3005/api/",
+				"uri": "${env.CHATBOT_SERVICE_URL}/api/",
 				"type": "JSON"
 			},
 			"sgtinLookupService": {
-				"uri": "http://localhost:3006/api/",
+				"uri": "${env.SGTIN_LOOKUP_SERVICE_URL}/api/",
 				"type": "JSON"
 			}
 		}

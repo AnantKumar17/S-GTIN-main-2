@@ -4,22 +4,17 @@
   "description": "SGTIN Lifecycle Management Frontend - SAP UI5 Application",
   "main": "index.html",
   "scripts": {
-    "start": "ui5 serve --open",
-    "build": "ui5 build",
-    "serve": "http-server dist -p 8080 -o",
-    "dev": "ui5 serve --port 8080 --open index.html"
+    "start": "node inject-env.js && http-server . -p 8080 -o -c-1",
+    "build": "node inject-env.js && echo 'Build complete'",
+    "serve": "node inject-env.js && http-server . -p 8080 -o",
+    "dev": "node inject-env.js && http-server . -p 8080 -o"
   },
-  "dependencies": {
-    "@sap/ui5-runtime": "^1.120.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@ui5/cli": "^3.0.0",
     "http-server": "^14.1.0"
   },
   "ui5": {
-    "dependencies": [
-      "@sap/ui5-runtime"
-    ]
+    "dependencies": []
   },
   "keywords": [
     "sap",

@@ -5,14 +5,14 @@
 sap.ui.define([], function() {
 	"use strict";
 
-	// Default localhost URLs (fallback)
+	// Default Vercel endpoints (fallback)
 	const DEFAULT_CONFIG = {
-		SGTIN_SERVICE_URL: "http://localhost:3001",
-		PO_SERVICE_URL: "http://localhost:3002",
-		INVENTORY_SERVICE_URL: "http://localhost:3003",
-		POS_SERVICE_URL: "http://localhost:3004",
-		CHATBOT_SERVICE_URL: "http://localhost:3005",
-		SGTIN_LOOKUP_SERVICE_URL: "http://localhost:3006"
+		SGTIN_SERVICE_URL: "https://sgtin-sgtin-service.vercel.app",
+		PO_SERVICE_URL: "https://sgtin-po-service.vercel.app",
+		INVENTORY_SERVICE_URL: "https://sgtin-inventory-service.vercel.app",
+		POS_SERVICE_URL: "https://sgtin-pos-service.vercel.app",
+		CHATBOT_SERVICE_URL: "https://sgtin-chatbot-service.vercel.app",
+		SGTIN_LOOKUP_SERVICE_URL: "https://sgtin-lookup-service.vercel.app"
 	};
 
 	// Try to load from window.__CONFIG__ (set by server or build process)

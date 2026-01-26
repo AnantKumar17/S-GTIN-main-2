@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Config Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        code { background: #f5f5f5; padding: 2px 5px; }
+    </style>
+</head>
+<body>
+    <h1>API Configuration Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Hardcoded Vercel URLs
+        const SERVICES = {
+            SGTIN_SERVICE_URL: "https://sgtin-sgtin-service.vercel.app",
+            PO_SERVICE_URL: "https://sgtin-po-service.vercel.app",
+            INVENTORY_SERVICE_URL: "https://sgtin-inventory-service.vercel.app",
+            POS_SERVICE_URL: "https://sgtin-pos-service.vercel.app",
+            CHATBOT_SERVICE_URL: "https://sgtin-chatbot-service.vercel.app",
+            SGTIN_LOOKUP_SERVICE_URL: "https://sgtin-lookup-service.vercel.app"
+        };
+
+        const resultsDiv = document.getElementById('results');
+        
+        async function testEndpoint(name, url) {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test';
+            testDiv.innerHTML = `<strong>${name}</strong><br/>URL: <code>${url}</code><br/>Status: Testing...`;
+            resultsDiv.appendChild(testDiv);
+            
+            try {
+                const response = await fetch(url + '/health', {
+                    method: 'GET',
+                    headers: { 'X-API-Key': 'dev-api-key-12345' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    testDiv.className = 'test success';
+                    testDiv.innerHTML = `<strong>✓ ${name}</strong><br/>URL: <code>${url}</code><br/>Status: <code>OK</code><br/>Response: <code>${JSON.stringify(data)}</code>`;
+                } else {
+                    testDiv.className = 'test error';
+                    testDiv.innerHTML = `<strong>✗ ${name}</strong><br/>URL: <code>${url}</code><br/>Status: <code>HTTP ${response.status}</code>`;
+                }
+            } catch (error) {
+                testDiv.className = 'test error';
+                testDiv.innerHTML = `<strong>✗ ${name}</strong><br/>URL: <code>${url}</code><br/>Error: <code>${error.message}</code>`;
+            }
+        }
+        
+        // Test all endpoints
+        Object.entries(SERVICES).forEach(([name, url]) => {
+            testEndpoint(name, url);
+        });
+    </script>
+</body>
+</html>

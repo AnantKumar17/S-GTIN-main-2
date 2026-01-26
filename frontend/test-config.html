@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Configuration Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        code { background: #f5f5f5; padding: 2px 5px; }
+        .config-display { background: #e9ecef; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>API Configuration Test</h1>
+    <div id="config-display" class="config-display">
+        <h3>Current Configuration:</h3>
+        <pre id="config-json"></pre>
+    </div>
+    <div id="results"></div>
+    
+    <script>
+        // Test the ApiConfig functionality
+        function testApiConfig() {
+            const resultsDiv = document.getElementById('results');
+            const configDisplay = document.getElementById('config-json');
+            
+            // Display current configuration
+            if (window.__CONFIG__) {
+                configDisplay.innerHTML = JSON.stringify(window.__CONFIG__, null, 2);
+            } else {
+                configDisplay.innerHTML = 'No configuration found!';
+            }
+            
+            // Test ApiConfig if available (for SAP UI5 context)
+            if (typeof sap !== 'undefined' && sap.ui && sap.ui.require) {
+                try {
+                    sap.ui.require(['com/sgtin/lifecycle/utils/ApiConfig'], function(ApiConfig) {
+                        if (ApiConfig) {
+                            const testDiv = document.createElement('div');
+                            testDiv.className = 'test success';
+                            testDiv.innerHTML = '<strong>✓ ApiConfig Module Loaded</strong><br/>ApiConfig utility is available and ready to use.';
+                            resultsDiv.appendChild(testDiv);
+                            
+                            // Test service URL retrieval
+                            const services = [
+                                'SGTIN_SERVICE_URL',
+                                'PO_SERVICE_URL', 
+                                'INVENTORY_SERVICE_URL',
+                                'POS_SERVICE_URL',
+                                'CHATBOT_SERVICE_URL',
+                                'SGTIN_LOOKUP_SERVICE_URL'
+                            ];
+                            
+                            services.forEach(serviceName => {
+                                const testDiv = document.createElement('div');
+                                testDiv.className = 'test';
+                                try {
+                                    const url = ApiConfig.getServiceUrl(serviceName);
+                                    testDiv.className = 'test success';
+                                    testDiv.innerHTML = `<strong>✓ ${serviceName}</strong><br/>URL: <code>${url}</code>`;
+                                } catch (error) {
+                                    testDiv.className = 'test error';
+                                    testDiv.innerHTML = `<strong>✗ ${serviceName}</strong><br/>Error: <code>${error.message}</code>`;
+                                }
+                                resultsDiv.appendChild(testDiv);
+                            });
+                        }
+                    });
+                } catch (error) {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'test error';
+                    testDiv.innerHTML = '<strong>✗ ApiConfig Module</strong><br/>Error loading ApiConfig: <code>' + error.message + '</code>';
+                    resultsDiv.appendChild(testDiv);
+                }
+            } else {
+                const testDiv = document.createElement('div');
+                testDiv.className = 'test error';
+                testDiv.innerHTML = '<strong>✗ SAP UI5 Context</strong><br/>SAP UI5 framework not detected. This test requires SAP UI5 to be loaded.';
+                resultsDiv.appendChild(testDiv);
+            }
+        }
+        
+        // Run test when page loads
+        window.onload = testApiConfig;
+    </script>
+</body>
+</html>

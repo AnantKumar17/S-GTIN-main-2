@@ -4,8 +4,9 @@ sap.ui.define([
 	"sap/m/MessageToast",
 	"sap/m/MessageBox",
 	"sap/ui/core/format/DateFormat",
-	"../utils/ApiConfig"
-], function (Controller, JSONModel, MessageToast, MessageBox, DateFormat, ApiConfig) {
+	"../utils/ApiConfig",
+	"../utils/ErrorHandler"
+], function (Controller, JSONModel, MessageToast, MessageBox, DateFormat, ApiConfig, ErrorHandler) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.PurchaseOrderDetail", {

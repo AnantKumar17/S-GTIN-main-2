@@ -5,8 +5,10 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/core/Fragment",
 	"sap/ui/core/format/DateFormat",
-	"../utils/EventBus"
-], function (Controller, MessageToast, MessageBox, JSONModel, Fragment, DateFormat, EventBus) {
+	"../utils/EventBus",
+	"../utils/ApiConfig",
+	"../utils/ErrorHandler"
+], function (Controller, MessageToast, MessageBox, JSONModel, Fragment, DateFormat, EventBus, ApiConfig, ErrorHandler) {
 	"use strict";
 
 	return Controller.extend("com.sgtin.lifecycle.controller.Inventory", {
