@@ -1,5 +1,6 @@
 const path = require('path');
-const { SerializedItem, PurchaseOrder, Product, LifecycleEvent, GoodsReceipt } = require(path.join(__dirname, '../../database/models'));
+const { SerializedItem, PurchaseOrder, Product, LifecycleEvent } = require(path.join(__dirname, '../../database/models'));
+const GoodsReceipt = require(path.join(__dirname, '../../database/models/GoodsReceipt'));
 const db = require(path.join(__dirname, '../../database/models/db'));
 const { decodeBarcode, validateSGTINFormat, parseSGTIN } = require(path.join(__dirname, '../utils/barcodeDecoder'));
 const barcodeScanner = require(path.join(__dirname, '../utils/barcodeScanner'));
