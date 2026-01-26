@@ -136,7 +136,7 @@ exports.receiveGoods = async (req, res, next) => {
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
     const sequenceQuery = `
-      SELECT COALESCE(MAX(CAST(SUBSTRING(gr_id FROM 'GR-\\d{8}-${poId}-(\\d+)') FROM '\\d+') AS INTEGER), 0) + 1 as next_seq
+      SELECT COALESCE(MAX(CAST(RIGHT(gr_id, 3) AS INTEGER)), 0) + 1 as next_seq
       FROM goods_receipts
       WHERE mandt = $1 AND gr_id LIKE 'GR-${dateStr}-${poId}-%'
     `;
