@@ -142,7 +142,9 @@ exports.receiveGoods = async (req, res, next) => {
     `;
     const sequenceResult = await client.query(sequenceQuery, [mandt]);
     const sequence = sequenceResult.rows[0].next_seq || 1;
-    const grId = `GR-${dateStr}-${poId}-${sequence.toString().padStart(3, '0')}`;
+    // Shorten GR ID to fit within 20 characters: GR-YYYYMMDD-SEQ
+    const shortDateStr = dateStr.substring(2); // Remove century (20) to save space
+    const grId = `GR-${shortDateStr}-${sequence.toString().padStart(3, '0')}`;
 
     // Update each SGTIN status to IN_STOCK
     for (const sgtin of sgtins) {
