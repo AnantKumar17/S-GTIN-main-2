@@ -138,19 +138,50 @@ exports.receiveGoods = async (req, res, next) => {
 
     const lifecycleEventModel = new LifecycleEvent(mandt);
 
-    // Generate goods receipt ID
+    // Generate goods receipt ID with improved uniqueness logic
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
-    const sequenceQuery = `
-      SELECT COALESCE(MAX(CAST(RIGHT(gr_id, 3) AS INTEGER)), 0) + 1 as next_seq
-      FROM goods_receipts
-      WHERE mandt = $1 AND gr_id LIKE 'GR-${dateStr}-${poId}-%'
-    `;
-    const sequenceResult = await client.query(sequenceQuery, [mandt]);
-    const sequence = sequenceResult.rows[0].next_seq || 1;
-    // Shorten GR ID to fit within 20 characters: GR-YYYYMMDD-SEQ
     const shortDateStr = dateStr.substring(2); // Remove century (20) to save space
-    const grId = `GR-${shortDateStr}-${sequence.toString().padStart(3, '0')}`;
+    
+    // Try to get the next sequence number
+    let sequence = 1;
+    let grId = `GR-${shortDateStr}-${sequence.toString().padStart(3, '0')}`;
+    
+    // Check if this GR ID already exists and find the next available one
+    let attempts = 0;
+    const maxAttempts = 1000; // Safety limit
+    
+    while (attempts < maxAttempts) {
+      try {
+        // Try to insert with this GR ID to test uniqueness
+        const testQuery = `
+          SELECT 1 FROM goods_receipts 
+          WHERE mandt = $1 AND gr_id = $2
+        `;
+        const testResult = await client.query(testQuery, [mandt, grId]);
+        
+        if (testResult.rows.length === 0) {
+          // GR ID is unique, we can use it
+          break;
+        }
+        
+        // GR ID exists, increment sequence
+        sequence++;
+        grId = `GR-${shortDateStr}-${sequence.toString().padStart(3, '0')}`;
+        attempts++;
+        
+      } catch (error) {
+        console.error('Error checking GR ID uniqueness:', error);
+        // If there's an error checking, increment and try again
+        sequence++;
+        grId = `GR-${shortDateStr}-${sequence.toString().padStart(3, '0')}`;
+        attempts++;
+      }
+    }
+    
+    if (attempts >= maxAttempts) {
+      throw new Error('Unable to generate unique GR ID after 1000 attempts');
+    }
 
     // Update each SGTIN status to IN_STOCK
     for (const sgtin of sgtins) {

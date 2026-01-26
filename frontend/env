@@ -1,0 +1,6 @@
+SGTIN_SERVICE_URL=https://sgtin-sgtin-service.vercel.app
+PO_SERVICE_URL=https://sgtin-po-service.vercel.app
+INVENTORY_SERVICE_URL=https://sgtin-inventory-service.vercel.app
+POS_SERVICE_URL=https://sgtin-pos-service.vercel.app
+CHATBOT_SERVICE_URL=https://sgtin-chatbot-service.vercel.app
+SGTIN_LOOKUP_SERVICE_URL=https://sgtin-lookup-service.vercel.app
