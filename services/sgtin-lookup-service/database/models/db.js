@@ -18,9 +18,15 @@ function getPool() {
       database: process.env.DB_NAME || 'sgtin_db',
       user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      max: 20, // Maximum number of clients in pool
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      max: 50, // Increased pool size to handle more concurrent connections
+      min: 5,  // Minimum number of clients in pool
+      idleTimeoutMillis: 10000, // Reduced idle timeout
+      connectionTimeoutMillis: 5000, // Increased connection timeout
+      acquireTimeoutMillis: 60000, // Added acquire timeout
+      createTimeoutMillis: 30000,  // Added create timeout
+      destroyTimeoutMillis: 5000,  // Added destroy timeout
+      reapIntervalMillis: 1000,    // Added reap interval
+      createRetryIntervalMillis: 200, // Added retry interval
     });
 
     pool.on('error', (err) => {
@@ -28,7 +34,15 @@ function getPool() {
       process.exit(-1);
     });
 
-    console.log('Database connection pool created');
+    pool.on('connect', (client) => {
+      console.log('New client connected to database');
+    });
+
+    pool.on('remove', (client) => {
+      console.log('Client removed from pool');
+    });
+
+    console.log('Database connection pool created with improved settings');
   }
 
   return pool;

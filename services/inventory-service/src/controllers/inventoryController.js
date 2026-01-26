@@ -63,15 +63,18 @@ exports.getGoodsReceipts = async (req, res, next) => {
  * POST /api/goods-receipts
  */
 exports.receiveGoods = async (req, res, next) => {
-  const client = await db.getClient();
+  let client;
   
   try {
+    client = await db.getClient();
     await client.query('BEGIN');
     
     const { mandt, poId, sgtins, location, receivedBy } = req.body;
 
     // Validation
     if (!mandt || !poId || !sgtins || !Array.isArray(sgtins) || sgtins.length === 0) {
+      await client.query('ROLLBACK');
+      client.release();
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: mandt, poId, sgtins (array)'
@@ -84,6 +87,7 @@ exports.receiveGoods = async (req, res, next) => {
     
     if (!po) {
       await client.query('ROLLBACK');
+      client.release();
       return res.status(404).json({
         success: false,
         error: `Purchase order ${poId} not found`
@@ -98,6 +102,7 @@ exports.receiveGoods = async (req, res, next) => {
     const invalidSGTINs = sgtins.filter(sgtin => !expectedSGTINSet.has(sgtin));
     if (invalidSGTINs.length > 0) {
       await client.query('ROLLBACK');
+      client.release();
       return res.status(400).json({
         success: false,
         error: `SGTINs not found in PO ${poId}`,
@@ -123,6 +128,7 @@ exports.receiveGoods = async (req, res, next) => {
 
     if (alreadyReceivedSGTINs.length > 0) {
       await client.query('ROLLBACK');
+      client.release();
       return res.status(409).json({
         success: false,
         error: `Cannot receive goods: ${alreadyReceivedSGTINs.length} SGTIN(s) have already been received`,
@@ -206,11 +212,23 @@ exports.receiveGoods = async (req, res, next) => {
     });
 
   } catch (error) {
-    await client.query('ROLLBACK');
+    if (client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Rollback error:', rollbackError);
+      }
+    }
     console.error('Error receiving goods:', error);
     next(error);
   } finally {
-    client.release();
+    if (client) {
+      try {
+        client.release();
+      } catch (releaseError) {
+        console.error('Client release error:', releaseError);
+      }
+    }
   }
 };
 
