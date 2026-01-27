@@ -6,6 +6,7 @@ const axios = require('axios');
 const { plan, isOutOfDomain } = require('./utils/queryPlanner');
 const { executePlans, summarize } = require('./utils/dbExecutor');
 const { sanitizeResponse, ENHANCED_SYSTEM_PROMPT } = require('./utils/systemKnowledge');
+const SQLGenerator = require('./utils/sqlGenerator'); // Add SQLGenerator import
 require('dotenv').config();
 
 const app = express();
@@ -55,12 +56,57 @@ const SYSTEM_CONTEXT = ENHANCED_SYSTEM_PROMPT + `
 
 Important:
 - Do not show raw SQL queries to the user.
-- Do not reveal internal table or view names in responses. Provide business-level outputs only (e.g., “purchase orders”, “inventory items”, “sales”).
+- Do not reveal internal table or view names in responses. Provide business-level outputs only (e.g., "purchase orders", "inventory items", "sales").
 - Do not disclose internal endpoints or ports. Focus on operational answers.
 - Summarize results and include only necessary identifiers (e.g., PO IDs, SGTINs) and business fields (status, quantities, supplier, warehouse).
 `;
 
 /* Removed legacy analyzeQuery: DB-first planning now handled entirely by QueryPlanner + DBExecutor */
+
+// Helper function to detect time-based PO queries that queryPlanner might miss
+function isTimeBasedPOQuery(question) {
+  const q = question.toLowerCase();
+  const isPOQuery = q.includes('purchase order') || q.includes('po');
+  const hasTimeKeywords = q.includes('hour') || q.includes('last hour') || q.includes('1 hour') || 
+                         q.includes('today') || q.includes('recent') || q.includes('last') ||
+                         q.includes('yesterday') || q.includes('this morning') || q.includes('past');
+  return isPOQuery && hasTimeKeywords;
+}
+
+// Helper function to format SQLGenerator results to match existing format
+function formatSQLGeneratorResult(sqlResult, question) {
+  if (!sqlResult.success || !sqlResult.data || sqlResult.data.length === 0) {
+    return {
+      answer: 'No purchase orders found for the specified timeframe.',
+      data: { type: 'PO_LIST', results: [] },
+      method: 'sql_generator_fallback'
+    };
+  }
+
+  const count = sqlResult.data.length;
+  const timePhrase = question.toLowerCase().includes('hour') ? 'in the last hour' : 'for the specified timeframe';
+  
+  let answer = `Found ${count} purchase order${count > 1 ? 's' : ''} ${timePhrase}:\n\n`;
+  
+  // Show summary of top results
+  const top5 = sqlResult.data.slice(0, 5);
+  top5.forEach(po => {
+    const productName = po.product_name || po.gtin || 'N/A';
+    const receivedQty = po.received_quantity || 0;
+    const totalQty = po.quantity || 0;
+    answer += `• PO ${po.po_id}: ${productName} (${po.status}, ${receivedQty}/${totalQty})\n`;
+  });
+  
+  if (count > 5) {
+    answer += `\n... and ${count - 5} more purchase orders.`;
+  }
+
+  return {
+    answer,
+    data: { type: 'PO_LIST', results: sqlResult.data },
+    method: 'sql_generator_fallback'
+  };
+}
 
 // Get context data for LLM queries
 async function getContextData(mandt) {
@@ -249,6 +295,30 @@ Note: This assistant is primarily for purchase orders, serialized items (SGTIN),
         });
       }
 
+      // NEW: Check if this is a time-based PO query that queryPlanner might have missed
+      if ((planned.intent === 'PO_LIST' || planned.intent === 'PO_STATUS') && isTimeBasedPOQuery(question)) {
+        console.log(`🕒 Detected time-based PO query, trying SQLGenerator fallback: "${question}"`);
+        try {
+          const sqlGenerator = new SQLGenerator(mandt);
+          const sqlResult = await sqlGenerator.processQuestion(question);
+          
+          if (sqlResult.success && sqlResult.data && sqlResult.data.length > 0) {
+            console.log(`✅ SQLGenerator found ${sqlResult.data.length} results`);
+            const formatted = formatSQLGeneratorResult(sqlResult, question);
+            return res.json({
+              answer: formatted.answer,
+              data: formatted.data,
+              conversationId: convId,
+              timestamp: new Date().toISOString(),
+              method: formatted.method
+            });
+          }
+        } catch (sqlError) {
+          console.warn(`⚠️ SQLGenerator fallback failed: ${sqlError.message}`);
+          // Continue to existing LLM fallback
+        }
+      }
+
       // If DB plans exist but produced no data or errored, attempt LLM as secondary
       try {
         const contextData = await getContextData(mandt);
@@ -349,9 +419,10 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     service: 'chatbot-service',
-    version: '2.0.0',
+    version: '2.1.0', // Bump version to indicate SQLGenerator integration
     features: {
       database_fallback: 'active',
+      sql_generator_fallback: 'active', // New feature flag
       github_models_api: process.env.GITHUB_TOKEN ? 'configured' : 'not_configured',
       model: process.env.MODEL_NAME || 'openai/gpt-4o'
     },
@@ -361,11 +432,12 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`🤖 Enhanced Chatbot Service v2.0 running on port ${port}`);
+  console.log(`🤖 Enhanced Chatbot Service v2.1 running on port ${port}`);
   console.log(`📡 API available at http://localhost:${port}/api/chat/query`);
   console.log(`🔧 Health check at http://localhost:${port}/health`);
   console.log(`🧠 LLM Model: ${process.env.MODEL_NAME || 'openai/gpt-4o'}`);
   console.log(`🗄️  Database Fallback: ${pool ? 'Connected' : 'Disabled'}`);
+  console.log(`🔍 SQLGenerator Fallback: Active for time-based queries`);
   console.log(`🌐 Service Integration: All 5 services (ports 3001-3005)`);
   
   if (process.env.GITHUB_TOKEN) {
