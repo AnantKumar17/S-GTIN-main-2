@@ -271,7 +271,7 @@ sap.ui.define([
 		},
 
 		_checkItemAvailability: function (sSGTIN, oValidationData) {
-			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "?mandt=100";
+			const sServiceUrl = ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory?mandt=100";
 			
 			jQuery.ajax({
 				url: sServiceUrl,

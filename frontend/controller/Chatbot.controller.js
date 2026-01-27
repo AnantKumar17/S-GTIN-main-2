@@ -303,7 +303,7 @@ sap.ui.define([
 			const batchId = batchMatch ? batchMatch[1] : null;
 
 			jQuery.ajax({
-				url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "?mandt=100",
+				url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory?mandt=100",
 				type: "GET",
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'
@@ -342,7 +342,7 @@ sap.ui.define([
 			console.log("DEBUG: Processing inventory query:", sMessage);
 
 			jQuery.ajax({
-				url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "?mandt=100",
+				url: ApiConfig.getServiceUrl(ApiConfig.INVENTORY_SERVICE) + "/inventory?mandt=100",
 				type: "GET",
 				headers: {
 					'X-API-Key': 'dev-api-key-12345'
